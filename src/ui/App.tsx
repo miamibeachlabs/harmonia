@@ -60,7 +60,7 @@ export const App = () => {
                 />
               ))}
               {selectedTriads.map(triad => (
-                <polygon
+                <polyline
                   class={`selection selection--${degreeIn(key, triad.root).function}`}
                   points={chordPath(triad)}
                 />

@@ -43,10 +43,10 @@ footer { margin-top: 28px; font-size: .875rem; }
 .third-link { fill: none; stroke-linecap: round; pointer-events: none; }
 .third-link--major-third { stroke: var(--ink); stroke-opacity: .55; stroke-width: 1.35; }
 .third-link--minor-third { stroke: var(--muted); stroke-opacity: .48; stroke-width: .8; }
-.selection { pointer-events: none; stroke: none; }
-.selection--stability { fill: color-mix(in srgb, var(--seafoam) 47%, transparent); }
-.selection--change { fill: color-mix(in srgb, var(--sun) 30%, transparent); }
-.selection--tension { fill: color-mix(in srgb, var(--coral) 28%, transparent); }
+.selection { fill: none; pointer-events: none; stroke-linecap: round; stroke-linejoin: round; stroke-width: 14; }
+.selection--stability { stroke: var(--seafoam); stroke-opacity: .48; }
+.selection--change { stroke: var(--sun); stroke-opacity: .35; }
+.selection--tension { stroke: var(--coral); stroke-opacity: .32; }
 .degree-node { position: absolute; z-index: 1; display: grid; place-items: center; width: 50px; height: 50px; min-height: 0; padding: 0; border: 2px solid var(--ink); color: var(--ink); transform: translate(-50%, -50%); transition: transform .15s ease, box-shadow .15s ease; }
 .degree-node:hover { transform: translate(-50%, -50%) scale(1.08); filter: brightness(.96); }
 .degree-node.is-selected { box-shadow: 0 0 0 5px color-mix(in srgb, var(--turquoise) 24%, transparent); }
