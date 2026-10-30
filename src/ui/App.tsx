@@ -1,8 +1,9 @@
 import { useState } from 'preact/hooks';
-import { cMajor, chordName, degreeIn, triadIn, type Degree, type DiatonicTriad } from '../domain/majorKey.ts';
+import { cMajor, chordName, degreeIn, thirdLinksIn, triadIn, type Degree, type DiatonicTriad } from '../domain/majorKey.ts';
 import { sourceCircleLayout } from '../projections/circleOfThirds.ts';
 
 const key = cMajor;
+const thirdLinks = thirdLinksIn(key);
 
 const point = (degree: Degree) => {
   const { x, y } = sourceCircleLayout[degree];
@@ -49,7 +50,15 @@ export const App = () => {
 
           <div class="circle-stage">
             <svg class="circle" viewBox="0 0 100 100" aria-hidden="true">
-              {key.triads.map(triad => <polyline class={`triad triad--${triad.quality}`} points={chordPath(triad)} />)}
+              {thirdLinks.map(link => (
+                <line
+                  class={`third-link third-link--${link.interval}`}
+                  x1={sourceCircleLayout[link.from].x}
+                  y1={sourceCircleLayout[link.from].y}
+                  x2={sourceCircleLayout[link.to].x}
+                  y2={sourceCircleLayout[link.to].y}
+                />
+              ))}
               {selectedTriads.map(triad => <polygon class={`selection selection--${triad.quality}`} points={chordPath(triad)} />)}
             </svg>
             {key.degrees.map(node => {
@@ -71,8 +80,8 @@ export const App = () => {
           </div>
 
           <div class="legend" aria-label="Diagram legend">
-            <span><i class="legend-line legend-line--major" />major triad</span>
-            <span><i class="legend-line legend-line--minor" />minor triad</span>
+            <span><i class="legend-line legend-line--major-third" />longer · major third</span>
+            <span><i class="legend-line legend-line--minor-third" />shorter · minor third</span>
           </div>
         </section>
 

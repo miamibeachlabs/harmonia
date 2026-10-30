@@ -2,6 +2,7 @@
 export type Degree = 'I' | 'ii' | 'iii' | 'IV' | 'V' | 'vi' | 'vii°';
 export type TriadQuality = 'major' | 'minor' | 'diminished';
 export type HarmonicFunction = 'stability' | 'change' | 'tension';
+export type ThirdInterval = 'major-third' | 'minor-third';
 
 export type DegreeInKey = Readonly<{
   degree: Degree;
@@ -14,6 +15,12 @@ export type DiatonicTriad = Readonly<{
   root: Degree;
   quality: TriadQuality;
   members: readonly [Degree, Degree, Degree];
+}>;
+
+export type ThirdLink = Readonly<{
+  from: Degree;
+  to: Degree;
+  interval: ThirdInterval;
 }>;
 
 export type MajorKey = Readonly<{
@@ -65,6 +72,29 @@ export const triadIn = (key: MajorKey, root: Degree): DiatonicTriad => {
   const found = key.triads.find(triad => triad.root === root);
   if (!found) throw new Error(`${root} has no diatonic triad in ${key.tonic} major.`);
   return found;
+};
+
+const thirdIntervals: Readonly<Record<TriadQuality, readonly [ThirdInterval, ThirdInterval]>> = {
+  major: ['major-third', 'minor-third'],
+  minor: ['minor-third', 'major-third'],
+  diminished: ['minor-third', 'minor-third'],
+};
+
+/** The seven distinct third-links that make the circle's visible skeleton. */
+export const thirdLinksIn = (key: MajorKey): readonly ThirdLink[] => {
+  const seen = new Set<string>();
+
+  return key.triads.flatMap(triad => {
+    const intervals = thirdIntervals[triad.quality];
+    return ([0, 1] as const).flatMap(index => {
+      const from = triad.members[index];
+      const to = triad.members[index + 1];
+      const identity = [from, to].sort().join(':');
+      if (seen.has(identity)) return [];
+      seen.add(identity);
+      return [{ from, to, interval: intervals[index] }];
+    });
+  });
 };
 
 export const chordName = (key: MajorKey, root: Degree) => {
