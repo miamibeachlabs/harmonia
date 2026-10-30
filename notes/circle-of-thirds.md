@@ -1,23 +1,24 @@
 # Circle of Thirds: first representation contract
 
 Harmonia's first view is an intentionally faithful study of the supplied
-G-major diagram. This note separates what the reference visibly establishes
+diagram, transposed to C major as Harmonia's default. This note separates what the reference visibly establishes
 from choices that still need confirmation from its author/source.
 
 ## Directly observed
 
-- The seven degrees of G major appear as named notes: G, A, B, C, D, E, F♯.
-- Their Roman numerals are I, ii, iii, IV, V, vi, vii°.
-- The visible outer route follows circle-of-fifths order: G → D → A → E → B → F♯ → C → G.
-- The three major diatonic triads are the heavy triangles: G–B–D, C–E–G, and D–F♯–A.
-- The three minor diatonic triads are the lighter triangles: A–C–E, B–D–F♯, and E–G–B.
-- The diminished vii° chord is named but is not drawn as a complete triangle in the screenshot.
+- The seven degrees of C major are C, D, E, F, G, A, B, with Roman numerals I, ii, iii, IV, V, vi, vii°.
+- The visible outer route follows circle-of-fifths order: C → G → D → A → E → B → F → C.
+- The three major diatonic triads are C–E–G, F–A–C, and G–B–D.
+- The three minor diatonic triads are D–F–A, E–G–B, and A–C–E; B–D–F is diminished.
+- Selecting a root shades its three chord tones. Multiple chord selections reveal their overlap.
+- The asymmetric edge lengths are meaningful: the source uses geometry and edge treatment to make unequal intervals visible.
 
 ## Deliberately not asserted yet
 
 - Whether color and node shape encode a stable musical rule or are illustrative styling.
 - Whether the outer loop itself carries a direction, and precisely what it means.
-- How diminished harmony, inversions, chromatic chords, or voice-leading belong in this view.
+- The source's exact metric: which interval direction determines each distance and which color names each edge class.
+- How inversions, chromatic chords, or voice-leading belong in this view.
 - Whether all major keys should preserve this exact geometry or whether the diagram is key-specific.
 
 Those questions remain source-research work, not application behavior.

@@ -1,68 +1,114 @@
-import { degreeByName, gMajorCircleOfThirds, type Degree, type Triad } from '../domain/circleOfThirds.ts';
+import { useState } from 'preact/hooks';
+import { cMajor, chordName, degreeIn, triadIn, type Degree, type DiatonicTriad } from '../domain/majorKey.ts';
+import { sourceCircleLayout } from '../projections/circleOfThirds.ts';
 
-const circle = gMajorCircleOfThirds;
+const key = cMajor;
+const fifthOrder: readonly Degree[] = ['I', 'V', 'ii', 'vi', 'iii', 'vii°', 'IV'];
+const fifthRoute: readonly Degree[] = [...fifthOrder, 'I'];
 
 const point = (degree: Degree) => {
-  const { x, y } = degreeByName(circle, degree);
+  const { x, y } = sourceCircleLayout[degree];
   return `${x},${y}`;
 };
 
-const triangle = (triad: Triad) => triad.degrees.map(point).join(' ');
+const polygon = (triad: DiatonicTriad) => triad.members.map(point).join(' ');
+const chordNotes = (triad: DiatonicTriad) => triad.members.map(degree => degreeIn(key, degree).note).join(' · ');
 
-const DegreeNode = ({ degree }: { degree: Degree }) => {
-  const node = degreeByName(circle, degree);
+const functionLabel = {
+  stability: 'Stability',
+  change: 'Change',
+  tension: 'Tension',
+} as const;
+
+export const App = () => {
+  const [selectedRoots, setSelectedRoots] = useState<readonly Degree[]>([]);
+  const selectedTriads = selectedRoots.map(root => triadIn(key, root));
+
+  const toggleChord = (root: Degree) =>
+    setSelectedRoots(selected => selected.includes(root)
+      ? selected.filter(item => item !== root)
+      : [...selected, root]);
+
   return (
-    <g class={`degree degree--${node.quality}`} transform={`translate(${node.x} ${node.y})`}>
-      <circle r="5.2" />
-      <text class="note" text-anchor="middle" dominant-baseline="central">{node.note}</text>
-      <text class="numeral" text-anchor="middle" y="9">{node.degree}</text>
-    </g>
+    <div class="workspace">
+      <header class="masthead">
+        <div>
+          <p class="eyebrow">HARMONIA · FIRST STUDY</p>
+          <h1>Circle of thirds<span>.</span></h1>
+        </div>
+        <p class="key">C major</p>
+      </header>
+
+      <main class="study">
+        <section class="diagram surface" aria-labelledby="diagram-title">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">SOURCE GEOMETRY</p>
+              <h2 id="diagram-title">Select a root to reveal its chord.</h2>
+            </div>
+            <p>Unequal edges make the unequal intervals visible before you name them.</p>
+          </div>
+
+          <div class="circle-stage">
+            <svg class="circle" viewBox="0 0 100 100" aria-hidden="true">
+              <polyline class="outer-loop" points={fifthRoute.map(point).join(' ')} />
+              {key.triads.map(triad => <polygon class={`triad triad--${triad.quality}`} points={polygon(triad)} />)}
+              {selectedTriads.map(triad => <polygon class={`selection selection--${triad.quality}`} points={polygon(triad)} />)}
+            </svg>
+            {key.degrees.map(node => {
+              const { x, y } = sourceCircleLayout[node.degree];
+              const selected = selectedRoots.includes(node.degree);
+              return (
+                <button
+                  class={`degree-node degree-node--${node.degree} ${selected ? 'is-selected' : ''}`}
+                  style={{ left: `${x}%`, top: `${y}%` }}
+                  aria-pressed={selected}
+                  aria-label={`${selected ? 'Hide' : 'Show'} ${node.note} ${node.quality} chord, ${node.degree}`}
+                  onClick={() => toggleChord(node.degree)}
+                >
+                  <span class="note">{node.note}</span>
+                  <span class="numeral">{node.degree}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          <div class="legend" aria-label="Diagram legend">
+            <span><i class="legend-line legend-line--major" />major triad</span>
+            <span><i class="legend-line legend-line--minor" />minor triad</span>
+            <span><i class="legend-line" />fifth-order route</span>
+          </div>
+        </section>
+
+        <aside class="reading surface" aria-labelledby="reading-title">
+          <p class="eyebrow">CHORDS IN VIEW</p>
+          <h2 id="reading-title">{selectedTriads.length ? 'Selected chords' : 'Nothing selected yet'}</h2>
+          {selectedTriads.length ? (
+            <ul class="chord-list">
+              {selectedTriads.map(triad => <li><strong>{chordName(key, triad.root)}</strong><span>{triad.root} · {chordNotes(triad)}</span></li>)}
+            </ul>
+          ) : <p>Tap C to shade C–E–G. Select more roots to compare overlapping chords.</p>}
+          {selectedTriads.length > 0 && <button class="clear" onClick={() => setSelectedRoots([])}>Clear selection</button>}
+
+          <div class="function-reading">
+            <p class="eyebrow">FUNCTIONAL FAMILIES</p>
+            <dl>
+              {(['stability', 'change', 'tension'] as const).map(functionName => (
+                <div>
+                  <dt>{functionLabel[functionName]}</dt>
+                  <dd>{key.degrees.filter(node => node.function === functionName).map(node => node.degree).join(' · ')}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </aside>
+      </main>
+
+      <section class="source-note">
+        <strong>First lens, not the whole system.</strong> This view holds one C-major field. Adjacent-key comparison, progression paths, and the full Circle of Fifths remain separate future projections of the same harmonic facts.
+      </section>
+
+      <footer>Available offline after the first online visit.</footer>
+    </div>
   );
 };
-
-export const App = () => (
-  <div class="workspace">
-    <header class="masthead">
-      <div>
-        <p class="eyebrow">HARMONIA · FIRST STUDY</p>
-        <h1>Circle of thirds<span>.</span></h1>
-      </div>
-      <p class="key">G major</p>
-    </header>
-
-    <main class="study">
-      <section class="diagram surface" aria-labelledby="diagram-title">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">SOURCE GEOMETRY</p>
-            <h2 id="diagram-title">Diatonic triads, held in one shape</h2>
-          </div>
-          <p>The first Harmonia view follows the supplied G-major reference.</p>
-        </div>
-
-        <svg class="circle" viewBox="0 0 100 100" role="img" aria-labelledby="circle-title circle-description">
-          <title id="circle-title">Circle of thirds in G major</title>
-          <desc id="circle-description">Seven scale degrees arranged in fifth-order. Dark triangles are major triads and light triangles are minor triads.</desc>
-          <path class="outer-loop" d="M 50 78 L 78 54 L 35 16 L 19 76 L 88 82 L 64 22 L 25 43 Z" />
-          {circle.triads.filter(triad => triad.quality === 'major').map(triad => <polygon class="triad triad--major" points={triangle(triad)} />)}
-          {circle.triads.filter(triad => triad.quality === 'minor').map(triad => <polygon class="triad triad--minor" points={triangle(triad)} />)}
-          {circle.degrees.map(node => <DegreeNode degree={node.degree} />)}
-        </svg>
-
-        <div class="legend" aria-label="Diagram legend">
-          <span><i class="legend-line legend-line--major" />major triad</span>
-          <span><i class="legend-line legend-line--minor" />minor triad</span>
-          <span><i class="legend-line" />fifth-order route</span>
-        </div>
-      </section>
-
-      <section class="reading surface" aria-labelledby="reading-title">
-        <p class="eyebrow">WHAT THIS FIRST VIEW CLAIMS</p>
-        <h2 id="reading-title">Each triangle is a chord; the same notes participate in several chords.</h2>
-        <p>G–B–D, C–E–G, and D–F♯–A are the major triads. The lighter triangles reveal their minor counterparts. F♯° remains present as degree vii°, while its diminished chord is intentionally left unresolved until the source treatment is better specified.</p>
-      </section>
-    </main>
-
-    <footer>Available offline after the first online visit.</footer>
-  </div>
-);
