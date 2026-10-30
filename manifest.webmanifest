@@ -1,7 +1,7 @@
 {
-  "name": "Miami Beach PWA",
-  "short_name": "PWA",
-  "description": "A small offline-first application.",
+  "name": "Harmonia",
+  "short_name": "Harmonia",
+  "description": "An offline-first study of musical harmony and its visual representations.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
