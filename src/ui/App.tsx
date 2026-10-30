@@ -1,4 +1,4 @@
-import { useState } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
 import { chordName, chordPitchClasses, degreeIn, harmonicFieldFor, keyCollectionNamed, keyCollections, thirdLinksIn, triadIn, type Degree, type DiatonicTriad, type HarmonicField, type KeyMode, type MinorForm } from '../domain/harmonicField.ts';
 import { sourceCircleLayout } from '../projections/circleOfThirds.ts';
 import { PianoKeyboard } from './PianoKeyboard.tsx';
@@ -12,6 +12,7 @@ const point = (field: HarmonicField, degree: Degree) => {
 
 const chordPath = (field: HarmonicField, triad: DiatonicTriad) => triad.members.map(degree => point(field, degree)).join(' ');
 const chordNotes = (field: HarmonicField, triad: DiatonicTriad) => triad.members.map(degree => degreeIn(field, degree).note).join(' · ');
+const chordIdentity = (field: HarmonicField, triad: DiatonicTriad) => chordPitchClasses(field, triad).toSorted((a, b) => a - b).join(':');
 
 const functionLabel = {
   stability: 'Stability · tonic',
@@ -22,42 +23,45 @@ const functionLabel = {
 
 const functionNames = ['stability', 'change', 'tension', 'context'] as const;
 
-const fieldName = (field: HarmonicField) =>
-  field.mode === 'major'
-    ? `${field.tonic} major`
-    : `${field.tonic} ${field.minorForm} minor`;
-
 export const App = () => {
   const [collectionId, setCollectionId] = useState('C');
   const [mode, setMode] = useState<KeyMode>('major');
   const [minorForm, setMinorForm] = useState<MinorForm>('natural');
   const [notation, setNotation] = useState<Notation>('notes');
-  const [selectedRoots, setSelectedRoots] = useState<readonly Degree[]>([]);
+  const [selectedChordIds, setSelectedChordIds] = useState<readonly string[]>([]);
   const collection = keyCollectionNamed(collectionId);
   const choice = mode === 'major' ? collection.major : collection.relativeMinor;
   const field = harmonicFieldFor(choice, minorForm);
   const thirdLinks = thirdLinksIn(field);
-  const selectedTriads = selectedRoots.map(root => triadIn(field, root));
+  const selectedTriads = field.triads.filter(triad => selectedChordIds.includes(chordIdentity(field, triad)));
+
+  useEffect(() => {
+    const available = new Set(field.triads.map(triad => chordIdentity(field, triad)));
+    setSelectedChordIds(selected => {
+      const retained = selected.filter(identity => available.has(identity));
+      return retained.length === selected.length ? selected : retained;
+    });
+  }, [field]);
 
   const selectCollection = (nextCollectionId: string) => {
     setCollectionId(nextCollectionId);
-    setSelectedRoots([]);
+    setSelectedChordIds([]);
   };
 
   const selectMode = (nextMode: KeyMode) => {
     setMode(nextMode);
-    setSelectedRoots([]);
   };
 
   const selectMinorForm = (nextForm: MinorForm) => {
     setMinorForm(nextForm);
-    setSelectedRoots([]);
   };
 
-  const toggleChord = (root: Degree) =>
-    setSelectedRoots(selected => selected.includes(root)
-      ? selected.filter(item => item !== root)
-      : [...selected, root]);
+  const toggleChord = (triad: DiatonicTriad) => {
+    const identity = chordIdentity(field, triad);
+    setSelectedChordIds(selected => selected.includes(identity)
+      ? selected.filter(item => item !== identity)
+      : [...selected, identity]);
+  };
 
   return (
     <div class="workspace">
@@ -94,6 +98,22 @@ export const App = () => {
         </div>
       </header>
 
+      <section class="keyboard-lens surface" aria-label="Keyboard">
+        <PianoKeyboard chords={selectedTriads.map(triad => ({
+          function: degreeIn(field, triad.root).function,
+          pitchClasses: chordPitchClasses(field, triad),
+        }))} />
+        {selectedTriads.length > 0 && <ul class="keyboard-chord-list">
+          {selectedTriads.map(triad => {
+            const root = degreeIn(field, triad.root);
+            return <li class={`keyboard-chord-list--${root.function}`}>
+              <strong>{notation === 'notes' ? chordName(field, triad.root) : `${triad.root} ${triad.quality}`}</strong>
+              <span>{notation === 'notes' ? chordNotes(field, triad) : triad.members.join(' · ')}</span>
+            </li>;
+          })}
+        </ul>}
+      </section>
+
       <main class="study">
         <section class="diagram surface" aria-labelledby="diagram-title">
           <div class="section-heading">
@@ -123,14 +143,15 @@ export const App = () => {
             </svg>
             {field.degrees.map(node => {
               const { x, y } = sourceCircleLayout[node.geometry];
-              const selected = selectedRoots.includes(node.degree);
+              const triad = triadIn(field, node.degree);
+              const selected = selectedChordIds.includes(chordIdentity(field, triad));
               return (
                 <div class="degree-slot" style={{ left: `${x}%`, top: `${y}%` }}>
                   <button
                     class={`degree-node degree-node--${node.quality} degree-node--${node.function} ${notation === 'roman' ? 'is-abstract' : ''} ${selected ? 'is-selected' : ''}`}
                     aria-pressed={selected}
                     aria-label={`${selected ? 'Hide' : 'Show'} ${node.note} ${node.quality} chord, ${node.degree}`}
-                    onClick={() => toggleChord(node.degree)}
+                    onClick={() => toggleChord(triad)}
                   >
                     <span class="note">{notation === 'notes' ? node.note : node.degree}</span>
                   </button>
@@ -159,7 +180,7 @@ export const App = () => {
               ))}
             </ul>
           ) : <p>{notation === 'notes' ? `Tap ${field.tonic} to shade its tonic chord.` : 'Tap a degree to reveal its chord path.'} Select more roots to compare overlapping chords.</p>}
-          {selectedTriads.length > 0 && <button class="clear" onClick={() => setSelectedRoots([])}>Clear selection</button>}
+          {selectedTriads.length > 0 && <button class="clear" onClick={() => setSelectedChordIds([])}>Clear selection</button>}
 
           <div class="function-reading">
             <p class="eyebrow">FUNCTIONAL FAMILIES</p>
@@ -174,37 +195,6 @@ export const App = () => {
           </div>
         </aside>
       </main>
-
-      {selectedTriads.length > 0 && <section class="keyboard-lens surface" aria-labelledby="keyboard-title">
-        <div class="keyboard-heading">
-          <div>
-            <p class="eyebrow">KEYBOARD PROJECTION</p>
-            <h2 id="keyboard-title">Chord tones across one fixed register.</h2>
-          </div>
-          <p>C2–C5 · every octave equivalent is shown.</p>
-        </div>
-        <div class="keyboard-stack">
-          <PianoKeyboard chords={selectedTriads.map(triad => ({
-            function: degreeIn(field, triad.root).function,
-            pitchClasses: chordPitchClasses(field, triad),
-          }))} />
-          <ul class="keyboard-chord-list">
-            {selectedTriads.map(triad => {
-              const root = degreeIn(field, triad.root);
-              return <li class={`keyboard-chord-list--${root.function}`}>
-                <strong>{notation === 'notes' ? chordName(field, triad.root) : `${triad.root} ${triad.quality}`}</strong>
-                <span>{notation === 'notes' ? chordNotes(field, triad) : triad.members.join(' · ')}</span>
-              </li>;
-            })}
-          </ul>
-        </div>
-      </section>}
-
-      <section class="source-note">
-        <strong>First lens, not the whole system.</strong> This view holds one {fieldName(field)} field. {field.minorForm === 'natural' && 'Natural minor retains its relative major’s pitch collection; only the tonal centre changes.'} {field.minorForm === 'harmonic' && 'Harmonic minor raises the leading tone so V and vii° can create dominant tension.'} Adjacent-key comparison, progression paths, and the full Circle of Fifths remain separate future projections of the same harmonic facts.
-      </section>
-
-      <footer>Available offline after the first online visit.</footer>
     </div>
   );
 };
