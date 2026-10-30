@@ -100,19 +100,23 @@ dd { margin: 0; color: var(--muted); font-family: Georgia, serif; }
 .keyboard-heading { display: flex; justify-content: space-between; align-items: end; gap: 24px; }
 .keyboard-heading > p { margin: 0; color: var(--muted); font-size: .875rem; }
 .keyboard-stack { display: grid; gap: 18px; margin-top: 20px; }
-.keyboard-chord { display: grid; grid-template-columns: 9rem minmax(0, 1fr); gap: 20px; align-items: center; }
-.keyboard-chord strong, .keyboard-chord span { display: block; }
-.keyboard-chord span { margin-top: 3px; color: var(--muted); font-size: .875rem; }
 .piano { display: block; width: 100%; height: auto; overflow: visible; }
 .piano-key--white rect { fill: var(--surface); stroke: var(--ink); stroke-width: .08; }
 .piano-key--black rect { fill: var(--ink); }
-.piano-key text { fill: var(--ink); font-family: system-ui, sans-serif; font-size: .72px; font-weight: 700; text-anchor: middle; }
-.piano-key--black text { fill: var(--surface); font-size: .54px; }
-.piano--stability .piano-key.is-selected rect { fill: var(--seafoam); }
-.piano--change .piano-key.is-selected rect { fill: #f4cb55; }
-.piano--tension .piano-key.is-selected rect { fill: var(--coral); }
-.piano--context .piano-key.is-selected rect { fill: var(--context); }
-.piano--tension .piano-key.is-selected text { fill: white; }
+.piano-dot { stroke: var(--ink); stroke-width: .07; }
+.piano-dot--stability { fill: var(--seafoam); }
+.piano-dot--change { fill: #f4cb55; }
+.piano-dot--tension { fill: var(--coral); }
+.piano-dot--context { fill: var(--context); }
+.keyboard-chord-list { display: flex; flex-wrap: wrap; gap: 8px 18px; padding: 0; margin: 0; list-style: none; }
+.keyboard-chord-list li { display: inline-flex; align-items: baseline; gap: 5px; }
+.keyboard-chord-list li::before { width: 10px; height: 10px; content: ''; border: 1px solid var(--ink); border-radius: 50%; }
+.keyboard-chord-list strong { font-size: .9rem; }
+.keyboard-chord-list span { color: var(--muted); font-size: .85rem; }
+.keyboard-chord-list--stability::before { background: var(--seafoam); }
+.keyboard-chord-list--change::before { background: #f4cb55; }
+.keyboard-chord-list--tension::before { background: var(--coral); }
+.keyboard-chord-list--context::before { background: var(--context); }
 
 @media (max-width: 520px) {
   .workspace { padding: 28px 16px; }
@@ -122,7 +126,6 @@ dd { margin: 0; color: var(--muted); font-family: Georgia, serif; }
   .reading { margin-top: 20px; }
   .keyboard-heading { display: block; }
   .keyboard-heading > p { margin-top: 10px; }
-  .keyboard-chord { grid-template-columns: 1fr; gap: 10px; }
   .degree-slot { width: 44px; height: 44px; }
   .degree-node .note { font-size: 1.35rem; }
 }

@@ -6,10 +6,13 @@ type PianoKey = Readonly<{
   black: boolean;
 }>;
 
-type PianoKeyboardProps = Readonly<{
+export type KeyboardChord = Readonly<{
   function: HarmonicFunction;
   pitchClasses: readonly number[];
-  labels: ReadonlyMap<number, string>;
+}>;
+
+type PianoKeyboardProps = Readonly<{
+  chords: readonly KeyboardChord[];
 }>;
 
 const blackKeyX: Readonly<Record<number, number>> = {
@@ -41,22 +44,32 @@ const keys = (): readonly PianoKey[] =>
 
 const keyboardKeys = keys();
 
-/** A fixed C2–C5 keyboard makes chord pitch classes comparable across selections. */
-export const PianoKeyboard = ({ function: harmonicFunction, pitchClasses, labels }: PianoKeyboardProps) => {
-  const selected = new Set(pitchClasses);
+const dotY = (index: number, count: number, black: boolean) => {
+  const top = black ? .55 : .75;
+  const bottom = black ? 2.55 : 4.25;
+  return top + (bottom - top) * (index + 1) / (count + 1);
+};
+
+/** One C2–C5 keyboard holds every selected chord in a stable dot lane. */
+export const PianoKeyboard = ({ chords }: PianoKeyboardProps) => {
+  const contains = (key: PianoKey, chord: KeyboardChord) => chord.pitchClasses.includes(key.pitchClass);
 
   return (
-    <svg class={`piano piano--${harmonicFunction}`} viewBox="0 0 22 5" role="img" aria-label="Chord tones repeated from C2 through C5">
+    <svg class="piano" viewBox="0 0 22 5" role="img" aria-label="Selected chord tones repeated from C2 through C5">
       {keyboardKeys.filter(key => !key.black).map(key => (
-        <g class={`piano-key piano-key--white ${selected.has(key.pitchClass) ? 'is-selected' : ''}`}>
+        <g class="piano-key piano-key--white">
           <rect x={key.x} y="0" width="1" height="5" />
-          {selected.has(key.pitchClass) && <text x={key.x + .5} y="3.8">{labels.get(key.pitchClass)}</text>}
+          {chords.map((chord, index) => contains(key, chord) && (
+            <circle class={`piano-dot piano-dot--${chord.function}`} cx={key.x + .5} cy={dotY(index, chords.length, false)} r=".23" />
+          ))}
         </g>
       ))}
       {keyboardKeys.filter(key => key.black).map(key => (
-        <g class={`piano-key piano-key--black ${selected.has(key.pitchClass) ? 'is-selected' : ''}`}>
+        <g class="piano-key piano-key--black">
           <rect x={key.x} y="0" width=".68" height="3.15" rx=".08" />
-          {selected.has(key.pitchClass) && <text x={key.x + .34} y="2.2">{labels.get(key.pitchClass)}</text>}
+          {chords.map((chord, index) => contains(key, chord) && (
+            <circle class={`piano-dot piano-dot--${chord.function}`} cx={key.x + .34} cy={dotY(index, chords.length, true)} r=".2" />
+          ))}
         </g>
       ))}
     </svg>

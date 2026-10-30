@@ -1,5 +1,5 @@
 import { useState } from 'preact/hooks';
-import { chordName, chordPitchClasses, degreeIn, harmonicFieldFor, keyCollectionNamed, keyCollections, pitchClassOf, thirdLinksIn, triadIn, type Degree, type DiatonicTriad, type HarmonicField, type KeyMode, type MinorForm } from '../domain/harmonicField.ts';
+import { chordName, chordPitchClasses, degreeIn, harmonicFieldFor, keyCollectionNamed, keyCollections, thirdLinksIn, triadIn, type Degree, type DiatonicTriad, type HarmonicField, type KeyMode, type MinorForm } from '../domain/harmonicField.ts';
 import { sourceCircleLayout } from '../projections/circleOfThirds.ts';
 import { PianoKeyboard } from './PianoKeyboard.tsx';
 
@@ -12,11 +12,6 @@ const point = (field: HarmonicField, degree: Degree) => {
 
 const chordPath = (field: HarmonicField, triad: DiatonicTriad) => triad.members.map(degree => point(field, degree)).join(' ');
 const chordNotes = (field: HarmonicField, triad: DiatonicTriad) => triad.members.map(degree => degreeIn(field, degree).note).join(' · ');
-const chordLabels = (field: HarmonicField, triad: DiatonicTriad) =>
-  new Map(triad.members.map(degree => {
-    const note = degreeIn(field, degree).note;
-    return [pitchClassOf(note), note] as const;
-  }));
 
 const functionLabel = {
   stability: 'Stability · tonic',
@@ -189,18 +184,19 @@ export const App = () => {
           <p>C2–C5 · every octave equivalent is shown.</p>
         </div>
         <div class="keyboard-stack">
-          {selectedTriads.map(triad => {
-            const root = degreeIn(field, triad.root);
-            return (
-              <article class="keyboard-chord">
-                <div>
-                  <strong>{notation === 'notes' ? chordName(field, triad.root) : `${triad.root} ${triad.quality}`}</strong>
-                  <span>{notation === 'notes' ? chordNotes(field, triad) : triad.members.join(' · ')}</span>
-                </div>
-                <PianoKeyboard function={root.function} pitchClasses={chordPitchClasses(field, triad)} labels={chordLabels(field, triad)} />
-              </article>
-            );
-          })}
+          <PianoKeyboard chords={selectedTriads.map(triad => ({
+            function: degreeIn(field, triad.root).function,
+            pitchClasses: chordPitchClasses(field, triad),
+          }))} />
+          <ul class="keyboard-chord-list">
+            {selectedTriads.map(triad => {
+              const root = degreeIn(field, triad.root);
+              return <li class={`keyboard-chord-list--${root.function}`}>
+                <strong>{notation === 'notes' ? chordName(field, triad.root) : `${triad.root} ${triad.quality}`}</strong>
+                <span>{notation === 'notes' ? chordNotes(field, triad) : triad.members.join(' · ')}</span>
+              </li>;
+            })}
+          </ul>
         </div>
       </section>}
 
