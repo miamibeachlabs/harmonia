@@ -9,18 +9,18 @@
   --ocean: #075c61;
   --coral: #e86f56;
   --sun: #d28a27;
-  --root-hue-0: #df5a68;
-  --root-hue-1: #e17d43;
-  --root-hue-2: #dca52d;
-  --root-hue-3: #c7bd38;
-  --root-hue-4: #7bad54;
-  --root-hue-5: #3c9a75;
-  --root-hue-6: #2b9d9d;
-  --root-hue-7: #448ab5;
-  --root-hue-8: #6577b3;
-  --root-hue-9: #8867ad;
-  --root-hue-10: #ae5d9f;
-  --root-hue-11: #c85b87;
+  --root-hue-0: #d6485c;
+  --root-hue-1: #d9762d;
+  --root-hue-2: #b39416;
+  --root-hue-3: #8b6e35;
+  --root-hue-4: #168f9a;
+  --root-hue-5: #3c9147;
+  --root-hue-6: #3867a3;
+  --root-hue-7: #7657a3;
+  --root-hue-8: #b14f97;
+  --root-hue-9: #a95866;
+  --root-hue-10: #6c7f3d;
+  --root-hue-11: #7758aa;
   color: var(--ink);
   background: var(--sand);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -111,6 +111,10 @@ h2 { margin: 0; font-size: 1.2rem; font-weight: 650; letter-spacing: -.02em; }
 .degree-node.root-hue-0, .degree-node.root-hue-1, .degree-node.root-hue-2, .degree-node.root-hue-3, .degree-node.root-hue-4, .degree-node.root-hue-5, .degree-node.root-hue-6, .degree-node.root-hue-7, .degree-node.root-hue-8, .degree-node.root-hue-9, .degree-node.root-hue-10, .degree-node.root-hue-11 { color: var(--ink); background: var(--root-color); }
 .selection { stroke: var(--root-color); }
 .keyboard-chord-list li::before { background: var(--root-color); }
+.keyboard-chord-list--major::before { border-radius: 1px; }
+.keyboard-chord-list--minor::before { border-radius: 50%; }
+.keyboard-chord-list--diminished::before { border-radius: 0; transform: rotate(45deg); }
+.keyboard-chord-list--augmented::before { border-radius: 0; clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%); }
 
 @media (max-width: 520px) {
   .workspace { padding: 28px 16px; }

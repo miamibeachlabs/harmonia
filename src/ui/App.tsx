@@ -93,12 +93,13 @@ export const App = () => {
       <section class="keyboard-lens surface" aria-label="Keyboard">
         <PianoKeyboard chords={selectedTriads.map(triad => ({
           rootHue: rootHueClass(degreeIn(field, triad.root).note),
+          quality: triad.quality,
           pitchClasses: chordPitchClasses(field, triad),
         }))} />
         {selectedTriads.length > 0 && <ul class="keyboard-chord-list">
           {selectedTriads.map(triad => {
             const root = degreeIn(field, triad.root);
-            return <li class={rootHueClass(root.note)}>
+            return <li class={`${rootHueClass(root.note)} keyboard-chord-list--${triad.quality}`}>
               <strong>{notation === 'notes' ? chordName(field, triad.root) : `${triad.root} ${triad.quality}`}</strong>
               <span>{notation === 'notes' ? chordNotes(field, triad) : triad.members.join(' · ')}</span>
             </li>;

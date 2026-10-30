@@ -1,3 +1,5 @@
+import type { TriadQuality } from '../domain/harmonicField.ts';
+
 type PianoKey = Readonly<{
   pitchClass: number;
   x: number;
@@ -6,6 +8,7 @@ type PianoKey = Readonly<{
 
 export type KeyboardChord = Readonly<{
   rootHue: string;
+  quality: TriadQuality;
   pitchClasses: readonly number[];
 }>;
 
@@ -48,6 +51,25 @@ const dotY = (index: number, count: number, black: boolean) => {
   return top + (bottom - top) * (index + 1) / (count + 1);
 };
 
+const dot = (chord: KeyboardChord, x: number, y: number, radius: number) => {
+  const className = `piano-dot ${chord.rootHue}`;
+
+  if (chord.quality === 'major') {
+    return <rect class={className} x={x - radius} y={y - radius} width={radius * 2} height={radius * 2} rx=".03" />;
+  }
+
+  if (chord.quality === 'diminished') {
+    return <polygon class={className} points={`${x},${y - radius} ${x + radius},${y} ${x},${y + radius} ${x - radius},${y}`} />;
+  }
+
+  if (chord.quality === 'augmented') {
+    const half = radius * .86;
+    return <polygon class={className} points={`${x - half},${y - radius} ${x + half},${y - radius} ${x + radius},${y} ${x + half},${y + radius} ${x - half},${y + radius} ${x - radius},${y}`} />;
+  }
+
+  return <circle class={className} cx={x} cy={y} r={radius} />;
+};
+
 /** One C2–C5 keyboard holds every selected chord in a stable dot lane. */
 export const PianoKeyboard = ({ chords }: PianoKeyboardProps) => {
   const contains = (key: PianoKey, chord: KeyboardChord) => chord.pitchClasses.includes(key.pitchClass);
@@ -58,7 +80,7 @@ export const PianoKeyboard = ({ chords }: PianoKeyboardProps) => {
         <g class="piano-key piano-key--white">
           <rect x={key.x} y="0" width="1" height="5" />
           {chords.map((chord, index) => contains(key, chord) && (
-            <circle class={`piano-dot ${chord.rootHue}`} cx={key.x + .5} cy={dotY(index, chords.length, false)} r=".23" />
+            dot(chord, key.x + .5, dotY(index, chords.length, false), .23)
           ))}
         </g>
       ))}
@@ -66,7 +88,7 @@ export const PianoKeyboard = ({ chords }: PianoKeyboardProps) => {
         <g class="piano-key piano-key--black">
           <rect x={key.x} y="0" width=".68" height="3.15" rx=".08" />
           {chords.map((chord, index) => contains(key, chord) && (
-            <circle class={`piano-dot ${chord.rootHue}`} cx={key.x + .34} cy={dotY(index, chords.length, true)} r=".2" />
+            dot(chord, key.x + .34, dotY(index, chords.length, true), .2)
           ))}
         </g>
       ))}
