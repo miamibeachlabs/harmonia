@@ -9,7 +9,7 @@ const point = (degree: Degree) => {
   return `${x},${y}`;
 };
 
-const polygon = (triad: DiatonicTriad) => triad.members.map(point).join(' ');
+const chordPath = (triad: DiatonicTriad) => triad.members.map(point).join(' ');
 const chordNotes = (triad: DiatonicTriad) => triad.members.map(degree => degreeIn(key, degree).note).join(' · ');
 
 const functionLabel = {
@@ -49,8 +49,8 @@ export const App = () => {
 
           <div class="circle-stage">
             <svg class="circle" viewBox="0 0 100 100" aria-hidden="true">
-              {key.triads.map(triad => <polygon class={`triad triad--${triad.quality}`} points={polygon(triad)} />)}
-              {selectedTriads.map(triad => <polygon class={`selection selection--${triad.quality}`} points={polygon(triad)} />)}
+              {key.triads.map(triad => <polyline class={`triad triad--${triad.quality}`} points={chordPath(triad)} />)}
+              {selectedTriads.map(triad => <polygon class={`selection selection--${triad.quality}`} points={chordPath(triad)} />)}
             </svg>
             {key.degrees.map(node => {
               const { x, y } = sourceCircleLayout[node.degree];

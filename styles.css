@@ -43,10 +43,10 @@ footer { margin-top: 28px; font-size: .875rem; }
 .triad { fill: none; stroke-linejoin: round; pointer-events: none; }
 .triad--major { stroke: var(--ink); stroke-opacity: .44; stroke-width: 1.55; }
 .triad--minor { stroke: var(--muted); stroke-opacity: .28; stroke-width: .65; }
-.selection { pointer-events: none; stroke-linejoin: round; }
-.selection--major { fill: color-mix(in srgb, var(--coral) 22%, transparent); stroke: var(--coral); stroke-width: 1.35; }
-.selection--minor { fill: color-mix(in srgb, var(--sun) 19%, transparent); stroke: var(--sun); stroke-width: 1.05; }
-.selection--diminished { fill: color-mix(in srgb, var(--seafoam) 30%, transparent); stroke: var(--turquoise); stroke-width: .85; stroke-dasharray: 1.2 1; }
+.selection { pointer-events: none; stroke: none; }
+.selection--major { fill: color-mix(in srgb, var(--coral) 22%, transparent); }
+.selection--minor { fill: color-mix(in srgb, var(--sun) 19%, transparent); }
+.selection--diminished { fill: color-mix(in srgb, var(--seafoam) 30%, transparent); }
 .degree-node { position: absolute; z-index: 1; display: grid; place-items: center; width: 50px; height: 50px; min-height: 0; padding: 0; border: 2px solid var(--ink); color: var(--ink); transform: translate(-50%, -50%); transition: transform .15s ease, box-shadow .15s ease; }
 .degree-node:hover { transform: translate(-50%, -50%) scale(1.08); background: inherit; }
 .degree-node.is-selected { box-shadow: 0 0 0 5px color-mix(in srgb, var(--turquoise) 24%, transparent); }
