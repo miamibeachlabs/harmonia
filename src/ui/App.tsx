@@ -1,6 +1,7 @@
 import { useState } from 'preact/hooks';
-import { chordName, degreeIn, harmonicFieldFor, keyCollectionNamed, keyCollections, thirdLinksIn, triadIn, type Degree, type DiatonicTriad, type HarmonicField, type KeyMode, type MinorForm } from '../domain/harmonicField.ts';
+import { chordName, chordPitchClasses, degreeIn, harmonicFieldFor, keyCollectionNamed, keyCollections, pitchClassOf, thirdLinksIn, triadIn, type Degree, type DiatonicTriad, type HarmonicField, type KeyMode, type MinorForm } from '../domain/harmonicField.ts';
 import { sourceCircleLayout } from '../projections/circleOfThirds.ts';
+import { PianoKeyboard } from './PianoKeyboard.tsx';
 
 type Notation = 'notes' | 'roman';
 
@@ -11,6 +12,11 @@ const point = (field: HarmonicField, degree: Degree) => {
 
 const chordPath = (field: HarmonicField, triad: DiatonicTriad) => triad.members.map(degree => point(field, degree)).join(' ');
 const chordNotes = (field: HarmonicField, triad: DiatonicTriad) => triad.members.map(degree => degreeIn(field, degree).note).join(' · ');
+const chordLabels = (field: HarmonicField, triad: DiatonicTriad) =>
+  new Map(triad.members.map(degree => {
+    const note = degreeIn(field, degree).note;
+    return [pitchClassOf(note), note] as const;
+  }));
 
 const functionLabel = {
   stability: 'Stability · tonic',
@@ -100,7 +106,6 @@ export const App = () => {
               <p class="eyebrow">SOURCE GEOMETRY</p>
               <h2 id="diagram-title">Select a root to reveal its chord.</h2>
             </div>
-            <p>Unequal edges make the unequal intervals visible before you name them.</p>
           </div>
 
           <div class="circle-stage">
@@ -174,6 +179,30 @@ export const App = () => {
           </div>
         </aside>
       </main>
+
+      {selectedTriads.length > 0 && <section class="keyboard-lens surface" aria-labelledby="keyboard-title">
+        <div class="keyboard-heading">
+          <div>
+            <p class="eyebrow">KEYBOARD PROJECTION</p>
+            <h2 id="keyboard-title">Chord tones across one fixed register.</h2>
+          </div>
+          <p>C2–C5 · every octave equivalent is shown.</p>
+        </div>
+        <div class="keyboard-stack">
+          {selectedTriads.map(triad => {
+            const root = degreeIn(field, triad.root);
+            return (
+              <article class="keyboard-chord">
+                <div>
+                  <strong>{notation === 'notes' ? chordName(field, triad.root) : `${triad.root} ${triad.quality}`}</strong>
+                  <span>{notation === 'notes' ? chordNotes(field, triad) : triad.members.join(' · ')}</span>
+                </div>
+                <PianoKeyboard function={root.function} pitchClasses={chordPitchClasses(field, triad)} labels={chordLabels(field, triad)} />
+              </article>
+            );
+          })}
+        </div>
+      </section>}
 
       <section class="source-note">
         <strong>First lens, not the whole system.</strong> This view holds one {fieldName(field)} field. {field.minorForm === 'natural' && 'Natural minor retains its relative major’s pitch collection; only the tonal centre changes.'} {field.minorForm === 'harmonic' && 'Harmonic minor raises the leading tone so V and vii° can create dominant tension.'} Adjacent-key comparison, progression paths, and the full Circle of Fifths remain separate future projections of the same harmonic facts.

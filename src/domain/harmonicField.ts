@@ -223,3 +223,34 @@ export const chordName = (field: HarmonicField, root: Degree) => {
   const degree = degreeIn(field, root);
   return `${degree.note} ${degree.quality}`;
 };
+
+const naturalPitchClass: Readonly<Record<string, number>> = {
+  C: 0,
+  D: 2,
+  E: 4,
+  F: 5,
+  G: 7,
+  A: 9,
+  B: 11,
+};
+
+/** Reduces a conventional note spelling to the pitch class heard on a piano. */
+export const pitchClassOf = (note: string): number => {
+  const letter = naturalPitchClass[note[0]];
+  if (letter === undefined) throw new Error(`${note} is not a supported note spelling.`);
+
+  const accidental = note.slice(1);
+  const offset = [...accidental].reduce((sum, symbol) => {
+    if (symbol === '♯') return sum + 1;
+    if (symbol === '♭') return sum - 1;
+    if (symbol === '𝄪') return sum + 2;
+    if (symbol === '𝄫') return sum - 2;
+    if (symbol === '♮') return sum;
+    throw new Error(`${note} is not a supported note spelling.`);
+  }, 0);
+
+  return (letter + offset + 12) % 12;
+};
+
+export const chordPitchClasses = (field: HarmonicField, triad: DiatonicTriad): readonly number[] =>
+  triad.members.map(degree => pitchClassOf(degreeIn(field, degree).note));
