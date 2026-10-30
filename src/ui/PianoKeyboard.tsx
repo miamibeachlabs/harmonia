@@ -1,5 +1,3 @@
-import type { HarmonicFunction } from '../domain/harmonicField.ts';
-
 type PianoKey = Readonly<{
   pitchClass: number;
   x: number;
@@ -7,7 +5,7 @@ type PianoKey = Readonly<{
 }>;
 
 export type KeyboardChord = Readonly<{
-  function: HarmonicFunction;
+  rootHue: string;
   pitchClasses: readonly number[];
 }>;
 
@@ -60,7 +58,7 @@ export const PianoKeyboard = ({ chords }: PianoKeyboardProps) => {
         <g class="piano-key piano-key--white">
           <rect x={key.x} y="0" width="1" height="5" />
           {chords.map((chord, index) => contains(key, chord) && (
-            <circle class={`piano-dot piano-dot--${chord.function}`} cx={key.x + .5} cy={dotY(index, chords.length, false)} r=".23" />
+            <circle class={`piano-dot ${chord.rootHue}`} cx={key.x + .5} cy={dotY(index, chords.length, false)} r=".23" />
           ))}
         </g>
       ))}
@@ -68,7 +66,7 @@ export const PianoKeyboard = ({ chords }: PianoKeyboardProps) => {
         <g class="piano-key piano-key--black">
           <rect x={key.x} y="0" width=".68" height="3.15" rx=".08" />
           {chords.map((chord, index) => contains(key, chord) && (
-            <circle class={`piano-dot piano-dot--${chord.function}`} cx={key.x + .34} cy={dotY(index, chords.length, true)} r=".2" />
+            <circle class={`piano-dot ${chord.rootHue}`} cx={key.x + .34} cy={dotY(index, chords.length, true)} r=".2" />
           ))}
         </g>
       ))}

@@ -8,7 +8,6 @@ export type Degree =
 
 export type GeometrySlot = 'I' | 'ii' | 'iii' | 'IV' | 'V' | 'vi' | 'vii°';
 export type TriadQuality = 'major' | 'minor' | 'diminished' | 'augmented';
-export type HarmonicFunction = 'stability' | 'change' | 'tension' | 'context';
 export type ThirdInterval = 'major-third' | 'minor-third';
 export type KeyMode = 'major' | 'minor';
 export type MinorForm = 'natural' | 'harmonic';
@@ -31,7 +30,6 @@ export type DegreeInField = Readonly<{
   degree: Degree;
   note: string;
   quality: TriadQuality;
-  function: HarmonicFunction;
   geometry: GeometrySlot;
 }>;
 
@@ -58,14 +56,12 @@ export type HarmonicField = Readonly<{
 type FieldPattern = Readonly<{
   degrees: readonly Degree[];
   qualities: readonly TriadQuality[];
-  functions: readonly HarmonicFunction[];
   geometry: readonly GeometrySlot[];
 }>;
 
 const majorPattern: FieldPattern = {
   degrees: ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'vii°'],
   qualities: ['major', 'minor', 'minor', 'major', 'major', 'minor', 'diminished'],
-  functions: ['stability', 'change', 'stability', 'change', 'tension', 'stability', 'tension'],
   geometry: ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'vii°'],
 };
 
@@ -73,9 +69,6 @@ const majorPattern: FieldPattern = {
 const naturalMinorPattern: FieldPattern = {
   degrees: ['i', 'ii°', 'III', 'iv', 'v', 'VI', 'VII'],
   qualities: ['minor', 'diminished', 'major', 'minor', 'minor', 'major', 'major'],
-  // i, ii° and iv have clear tonic/predominant roles. The remaining chords
-  // are deliberately contextual: natural minor has no leading-tone dominant.
-  functions: ['stability', 'change', 'context', 'change', 'context', 'context', 'context'],
   geometry: ['vi', 'vii°', 'I', 'ii', 'iii', 'IV', 'V'],
 };
 
@@ -83,7 +76,6 @@ const naturalMinorPattern: FieldPattern = {
 const harmonicMinorPattern: FieldPattern = {
   degrees: ['i', 'ii°', 'III+', 'iv', 'V', 'VI', 'vii°'],
   qualities: ['minor', 'diminished', 'augmented', 'minor', 'major', 'major', 'diminished'],
-  functions: ['stability', 'change', 'context', 'change', 'tension', 'context', 'tension'],
   geometry: ['vi', 'vii°', 'I', 'ii', 'iii', 'IV', 'V'],
 };
 
@@ -112,7 +104,6 @@ const fieldFrom = (
       degree,
       note: notes[index],
       quality: pattern.qualities[index],
-      function: pattern.functions[index],
       geometry: pattern.geometry[index],
     })),
     triads: pattern.degrees.map((_, index) => triadAt(index)),

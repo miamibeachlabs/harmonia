@@ -2,6 +2,7 @@ import { useEffect, useState } from 'preact/hooks';
 import { chordName, chordPitchClasses, degreeIn, harmonicFieldFor, keyCollectionNamed, keyCollections, thirdLinksIn, triadIn, type Degree, type DiatonicTriad, type HarmonicField, type KeyMode, type MinorForm } from '../domain/harmonicField.ts';
 import { sourceCircleLayout } from '../projections/circleOfThirds.ts';
 import { PianoKeyboard } from './PianoKeyboard.tsx';
+import { rootHueClass } from './rootHue.ts';
 
 type Notation = 'notes' | 'roman';
 
@@ -13,15 +14,6 @@ const point = (field: HarmonicField, degree: Degree) => {
 const chordPath = (field: HarmonicField, triad: DiatonicTriad) => triad.members.map(degree => point(field, degree)).join(' ');
 const chordNotes = (field: HarmonicField, triad: DiatonicTriad) => triad.members.map(degree => degreeIn(field, degree).note).join(' · ');
 const chordIdentity = (field: HarmonicField, triad: DiatonicTriad) => chordPitchClasses(field, triad).toSorted((a, b) => a - b).join(':');
-
-const functionLabel = {
-  stability: 'Stability · tonic',
-  change: 'Change · predominant',
-  tension: 'Tension · dominant',
-  context: 'Context-dependent',
-} as const;
-
-const functionNames = ['stability', 'change', 'tension', 'context'] as const;
 
 export const App = () => {
   const [collectionId, setCollectionId] = useState('C');
@@ -100,13 +92,13 @@ export const App = () => {
 
       <section class="keyboard-lens surface" aria-label="Keyboard">
         <PianoKeyboard chords={selectedTriads.map(triad => ({
-          function: degreeIn(field, triad.root).function,
+          rootHue: rootHueClass(degreeIn(field, triad.root).note),
           pitchClasses: chordPitchClasses(field, triad),
         }))} />
         {selectedTriads.length > 0 && <ul class="keyboard-chord-list">
           {selectedTriads.map(triad => {
             const root = degreeIn(field, triad.root);
-            return <li class={`keyboard-chord-list--${root.function}`}>
+            return <li class={rootHueClass(root.note)}>
               <strong>{notation === 'notes' ? chordName(field, triad.root) : `${triad.root} ${triad.quality}`}</strong>
               <span>{notation === 'notes' ? chordNotes(field, triad) : triad.members.join(' · ')}</span>
             </li>;
@@ -136,7 +128,7 @@ export const App = () => {
               ))}
               {selectedTriads.map(triad => (
                 <polyline
-                  class={`selection selection--${degreeIn(field, triad.root).function}`}
+                  class={`selection ${rootHueClass(degreeIn(field, triad.root).note)}`}
                   points={chordPath(field, triad)}
                 />
               ))}
@@ -148,7 +140,7 @@ export const App = () => {
               return (
                 <div class="degree-slot" style={{ left: `${x}%`, top: `${y}%` }}>
                   <button
-                    class={`degree-node degree-node--${node.quality} degree-node--${node.function} ${notation === 'roman' ? 'is-abstract' : ''} ${selected ? 'is-selected' : ''}`}
+                    class={`degree-node degree-node--${node.quality} ${rootHueClass(node.note)} ${notation === 'roman' ? 'is-abstract' : ''} ${selected ? 'is-selected' : ''}`}
                     aria-pressed={selected}
                     aria-label={`${selected ? 'Hide' : 'Show'} ${node.note} ${node.quality} chord, ${node.degree}`}
                     onClick={() => toggleChord(triad)}
@@ -182,17 +174,6 @@ export const App = () => {
           ) : <p>{notation === 'notes' ? `Tap ${field.tonic} to shade its tonic chord.` : 'Tap a degree to reveal its chord path.'} Select more roots to compare overlapping chords.</p>}
           {selectedTriads.length > 0 && <button class="clear" onClick={() => setSelectedChordIds([])}>Clear selection</button>}
 
-          <div class="function-reading">
-            <p class="eyebrow">FUNCTIONAL FAMILIES</p>
-            <dl>
-              {functionNames.filter(functionName => field.degrees.some(node => node.function === functionName)).map(functionName => (
-                <div class={`function-family function-family--${functionName}`}>
-                  <dt>{functionLabel[functionName]}</dt>
-                  <dd>{field.degrees.filter(node => node.function === functionName).map(node => node.degree).join(' · ')}</dd>
-                </div>
-              ))}
-            </dl>
-          </div>
         </aside>
       </main>
     </div>

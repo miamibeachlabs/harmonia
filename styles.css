@@ -9,7 +9,18 @@
   --ocean: #075c61;
   --coral: #e86f56;
   --sun: #d28a27;
-  --context: #dde3dc;
+  --root-hue-0: #df5a68;
+  --root-hue-1: #e17d43;
+  --root-hue-2: #dca52d;
+  --root-hue-3: #c7bd38;
+  --root-hue-4: #7bad54;
+  --root-hue-5: #3c9a75;
+  --root-hue-6: #2b9d9d;
+  --root-hue-7: #448ab5;
+  --root-hue-8: #6577b3;
+  --root-hue-9: #8867ad;
+  --root-hue-10: #ae5d9f;
+  --root-hue-11: #c85b87;
   color: var(--ink);
   background: var(--sand);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -51,10 +62,7 @@ h2 { margin: 0; font-size: 1.2rem; font-weight: 650; letter-spacing: -.02em; }
 .third-link--major-third { stroke: var(--ink); stroke-opacity: .55; stroke-width: 1.35; }
 .third-link--minor-third { stroke: var(--muted); stroke-opacity: .48; stroke-width: .8; }
 .selection { fill: none; pointer-events: none; stroke-linecap: round; stroke-linejoin: round; stroke-width: 14; }
-.selection--stability { stroke: var(--seafoam); stroke-opacity: .48; }
-.selection--change { stroke: var(--sun); stroke-opacity: .35; }
-.selection--tension { stroke: var(--coral); stroke-opacity: .32; }
-.selection--context { stroke: var(--context); stroke-opacity: .7; }
+.selection { stroke-opacity: .38; }
 .degree-slot { position: absolute; z-index: 1; width: 50px; height: 50px; transform: translate(-50%, -50%); }
 .degree-node { position: relative; display: grid; place-items: center; width: 100%; height: 100%; min-height: 0; padding: 0; border: 2px solid var(--ink); color: var(--ink); transition: transform .15s ease, box-shadow .15s ease; }
 .degree-node:hover { transform: scale(1.08); filter: brightness(.96); }
@@ -63,10 +71,6 @@ h2 { margin: 0; font-size: 1.2rem; font-weight: 650; letter-spacing: -.02em; }
 .degree-node--minor { border-radius: 50%; }
 .degree-node--diminished { border-radius: 0; clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
 .degree-node--augmented { border-radius: 0; clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%); }
-.degree-node--stability, .degree-node--stability:hover { background: var(--seafoam); }
-.degree-node--change, .degree-node--change:hover { background: #f4cb55; }
-.degree-node--tension, .degree-node--tension:hover { color: white; background: var(--coral); }
-.degree-node--context, .degree-node--context:hover { background: var(--context); }
 .degree-node .note { font-size: 1.55rem; font-weight: 800; letter-spacing: -.07em; line-height: .9; }
 .degree-node.is-abstract .note { font-family: Georgia, serif; font-size: 1.05rem; letter-spacing: -.04em; }
 .degree-slot .numeral { position: absolute; top: calc(100% + 5px); left: 50%; color: var(--ink); font-family: Georgia, serif; font-size: 1rem; font-weight: 700; line-height: 1; transform: translateX(-50%); white-space: nowrap; }
@@ -82,35 +86,31 @@ h2 { margin: 0; font-size: 1.2rem; font-weight: 650; letter-spacing: -.02em; }
 .chord-list strong { color: var(--ink); }
 .chord-list span { color: var(--muted); font-size: .9rem; }
 .clear { width: 100%; margin-top: 4px; }
-.function-reading { margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--line); }
-.function-reading .eyebrow { margin-bottom: 12px; }
-dl { display: grid; gap: 10px; margin: 0; }
-dl div { display: grid; grid-template-columns: 1fr auto; gap: 12px; }
-dt { display: inline-flex; align-items: center; gap: 7px; font-weight: 700; }
-dt::before { width: 10px; height: 10px; content: ''; border: 1px solid var(--ink); border-radius: 50%; }
-.function-family--stability dt::before { background: var(--seafoam); }
-.function-family--change dt::before { background: #f4cb55; }
-.function-family--tension dt::before { background: var(--coral); }
-.function-family--context dt::before { background: var(--context); }
-dd { margin: 0; color: var(--muted); font-family: Georgia, serif; }
 .keyboard-lens { padding: 14px 20px; }
 .piano { display: block; width: 100%; height: auto; overflow: visible; }
 .piano-key--white rect { fill: var(--surface); stroke: var(--ink); stroke-width: .08; }
 .piano-key--black rect { fill: var(--ink); }
-.piano-dot { stroke: var(--ink); stroke-width: .07; }
-.piano-dot--stability { fill: var(--seafoam); }
-.piano-dot--change { fill: #f4cb55; }
-.piano-dot--tension { fill: var(--coral); }
-.piano-dot--context { fill: var(--context); }
+.piano-dot { fill: var(--root-color); stroke: var(--ink); stroke-width: .07; }
 .keyboard-chord-list { display: flex; flex-wrap: wrap; gap: 8px 18px; padding: 0; margin: 0; list-style: none; }
 .keyboard-chord-list li { display: inline-flex; align-items: baseline; gap: 5px; }
 .keyboard-chord-list li::before { width: 10px; height: 10px; content: ''; border: 1px solid var(--ink); border-radius: 50%; }
 .keyboard-chord-list strong { font-size: .9rem; }
 .keyboard-chord-list span { color: var(--muted); font-size: .85rem; }
-.keyboard-chord-list--stability::before { background: var(--seafoam); }
-.keyboard-chord-list--change::before { background: #f4cb55; }
-.keyboard-chord-list--tension::before { background: var(--coral); }
-.keyboard-chord-list--context::before { background: var(--context); }
+.root-hue-0 { --root-color: var(--root-hue-0); }
+.root-hue-1 { --root-color: var(--root-hue-1); }
+.root-hue-2 { --root-color: var(--root-hue-2); }
+.root-hue-3 { --root-color: var(--root-hue-3); }
+.root-hue-4 { --root-color: var(--root-hue-4); }
+.root-hue-5 { --root-color: var(--root-hue-5); }
+.root-hue-6 { --root-color: var(--root-hue-6); }
+.root-hue-7 { --root-color: var(--root-hue-7); }
+.root-hue-8 { --root-color: var(--root-hue-8); }
+.root-hue-9 { --root-color: var(--root-hue-9); }
+.root-hue-10 { --root-color: var(--root-hue-10); }
+.root-hue-11 { --root-color: var(--root-hue-11); }
+.degree-node.root-hue-0, .degree-node.root-hue-1, .degree-node.root-hue-2, .degree-node.root-hue-3, .degree-node.root-hue-4, .degree-node.root-hue-5, .degree-node.root-hue-6, .degree-node.root-hue-7, .degree-node.root-hue-8, .degree-node.root-hue-9, .degree-node.root-hue-10, .degree-node.root-hue-11 { color: var(--ink); background: var(--root-color); }
+.selection { stroke: var(--root-color); }
+.keyboard-chord-list li::before { background: var(--root-color); }
 
 @media (max-width: 520px) {
   .workspace { padding: 28px 16px; }
