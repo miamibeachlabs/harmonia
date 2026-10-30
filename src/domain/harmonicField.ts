@@ -21,6 +21,12 @@ export type KeyChoice = Readonly<{
   harmonicNotes?: readonly string[];
 }>;
 
+export type KeyCollection = Readonly<{
+  id: string;
+  major: KeyChoice;
+  relativeMinor: KeyChoice;
+}>;
+
 export type DegreeInField = Readonly<{
   degree: Degree;
   note: string;
@@ -128,7 +134,7 @@ const minor = (tonic: string, naturalNotes: readonly string[], harmonicNotes: re
   harmonicNotes,
 });
 
-export const keyChoices: readonly KeyChoice[] = [
+const majorKeyChoices: readonly KeyChoice[] = [
   major('C', ['C', 'D', 'E', 'F', 'G', 'A', 'B']),
   major('G', ['G', 'A', 'B', 'C', 'D', 'E', 'F♯']),
   major('D', ['D', 'E', 'F♯', 'G', 'A', 'B', 'C♯']),
@@ -141,6 +147,9 @@ export const keyChoices: readonly KeyChoice[] = [
   major('E♭', ['E♭', 'F', 'G', 'A♭', 'B♭', 'C', 'D']),
   major('B♭', ['B♭', 'C', 'D', 'E♭', 'F', 'G', 'A']),
   major('F', ['F', 'G', 'A', 'B♭', 'C', 'D', 'E']),
+];
+
+const minorKeyChoices: readonly KeyChoice[] = [
   minor('A', ['A', 'B', 'C', 'D', 'E', 'F', 'G'], ['A', 'B', 'C', 'D', 'E', 'F', 'G♯']),
   minor('E', ['E', 'F♯', 'G', 'A', 'B', 'C', 'D'], ['E', 'F♯', 'G', 'A', 'B', 'C', 'D♯']),
   minor('B', ['B', 'C♯', 'D', 'E', 'F♯', 'G', 'A'], ['B', 'C♯', 'D', 'E', 'F♯', 'G', 'A♯']),
@@ -155,8 +164,14 @@ export const keyChoices: readonly KeyChoice[] = [
   minor('D', ['D', 'E', 'F', 'G', 'A', 'B♭', 'C'], ['D', 'E', 'F', 'G', 'A', 'B♭', 'C♯']),
 ];
 
-export const keyChoiceNamed = (id: string): KeyChoice => {
-  const found = keyChoices.find(choice => choice.id === id);
+export const keyCollections: readonly KeyCollection[] = majorKeyChoices.map((major, index) => ({
+  id: major.tonic,
+  major,
+  relativeMinor: minorKeyChoices[index],
+}));
+
+export const keyCollectionNamed = (id: string): KeyCollection => {
+  const found = keyCollections.find(collection => collection.id === id);
   if (!found) throw new Error(`${id} is not available.`);
   return found;
 };

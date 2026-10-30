@@ -14,6 +14,7 @@ from choices that still need confirmation from its author/source.
 - The asymmetric edge lengths are meaningful: major thirds (four semitones) receive a visibly larger geometric span than minor thirds (three semitones). Chord quality does not affect link strength. Harmonia deliberately exaggerates this difference for legibility; the exact source measurement remains unknown.
 - Node hue encodes harmonic function: Stability (I, iii, vi), Change (ii, IV), and Tension (V, vii°). Shape encodes triad quality: square for major, circle for minor, and diamond for diminished.
 - The selected major key changes note names but not this degree-level structure. Roman-numeral mode deliberately suppresses note names so the same object can be read abstractly.
+- The control names each shared collection as a relative pair (for example, C major ↔ A minor). The Major / Relative minor switch changes the tonal centre within that one collection; it is not a separate encyclopedic key list.
 - Natural minor keeps its relative major's pitch collection and therefore preserves its underlying geometry. It re-centres the reading on minor `i`; its `v` and `VII` are deliberately marked context-dependent rather than dominant, because they lack a raised leading tone.
 - Harmonic minor is an explicit variation: it raises scale degree 7, turning `v` into `V` and `VII` into `vii°`. These become the tension family. `III+` is the resulting augmented triad and has its own hexagonal shape.
 

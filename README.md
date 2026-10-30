@@ -2,8 +2,8 @@
 
 An offline-first personal lab for seeing harmonic structure through distinct,
 complementary representations. The first study is an interactive Circle of
-Thirds, based on a supplied reference diagram. It opens in C major and can
-also compare every common major or minor tonic.
+Thirds, based on a supplied reference diagram. It opens in C major and moves
+through paired relative-major/minor readings of each shared pitch collection.
 
 The application has a small pure musical core in `src/domain/`. Preact and SVG
 form only its first visual projection in `src/ui/`.
