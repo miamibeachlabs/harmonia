@@ -1,4 +1,4 @@
-import type { Degree } from '../domain/majorKey.ts';
+import type { GeometrySlot } from '../domain/harmonicField.ts';
 
 /**
  * A circle-of-thirds embedding. Major thirds receive a visibly larger arc than
@@ -8,15 +8,15 @@ import type { Degree } from '../domain/majorKey.ts';
  * of the source artwork. This remains a projection, separate from the key.
  */
 export type Point = Readonly<{ x: number; y: number }>;
-export type CircleOfThirdsLayout = Readonly<Record<Degree, Point>>;
+export type CircleOfThirdsLayout = Readonly<Record<GeometrySlot, Point>>;
 
-const degreesAroundThirds: readonly [Degree, ...Degree[]] = [
+const degreesAroundThirds: readonly [GeometrySlot, ...GeometrySlot[]] = [
   'I', 'iii', 'V', 'vii°', 'ii', 'IV', 'vi',
 ];
 
 const majorThirdArc = 68;
 const minorThirdArc = 39;
-const outgoingArc: Readonly<Record<Degree, number>> = {
+const outgoingArc: Readonly<Record<GeometrySlot, number>> = {
   I: majorThirdArc,
   ii: minorThirdArc,
   iii: minorThirdArc,
@@ -37,7 +37,7 @@ const pointAt = (angle: number): Point => {
 
 const layout = (): CircleOfThirdsLayout => {
   let angle = 90;
-  const points = {} as Record<Degree, Point>;
+  const points = {} as Record<GeometrySlot, Point>;
 
   for (const degree of degreesAroundThirds) {
     points[degree] = pointAt(angle);

@@ -1,33 +1,48 @@
 import { useState } from 'preact/hooks';
-import { chordName, degreeIn, majorKeyNamed, majorKeys, thirdLinksIn, triadIn, type Degree, type DiatonicTriad, type MajorKey } from '../domain/majorKey.ts';
+import { chordName, degreeIn, harmonicFieldFor, keyChoiceNamed, keyChoices, thirdLinksIn, triadIn, type Degree, type DiatonicTriad, type HarmonicField, type MinorForm } from '../domain/harmonicField.ts';
 import { sourceCircleLayout } from '../projections/circleOfThirds.ts';
 
 type Notation = 'notes' | 'roman';
 
-const point = (degree: Degree) => {
-  const { x, y } = sourceCircleLayout[degree];
+const point = (field: HarmonicField, degree: Degree) => {
+  const { x, y } = sourceCircleLayout[degreeIn(field, degree).geometry];
   return `${x},${y}`;
 };
 
-const chordPath = (triad: DiatonicTriad) => triad.members.map(point).join(' ');
-const chordNotes = (key: MajorKey, triad: DiatonicTriad) => triad.members.map(degree => degreeIn(key, degree).note).join(' · ');
+const chordPath = (field: HarmonicField, triad: DiatonicTriad) => triad.members.map(degree => point(field, degree)).join(' ');
+const chordNotes = (field: HarmonicField, triad: DiatonicTriad) => triad.members.map(degree => degreeIn(field, degree).note).join(' · ');
 
 const functionLabel = {
-  stability: 'Stability',
-  change: 'Change',
-  tension: 'Tension',
+  stability: 'Stability · tonic',
+  change: 'Change · predominant',
+  tension: 'Tension · dominant',
+  context: 'Context-dependent',
 } as const;
 
+const functionNames = ['stability', 'change', 'tension', 'context'] as const;
+
+const fieldName = (field: HarmonicField) =>
+  field.mode === 'major'
+    ? `${field.tonic} major`
+    : `${field.tonic} ${field.minorForm} minor`;
+
 export const App = () => {
-  const [tonic, setTonic] = useState('C');
+  const [keyId, setKeyId] = useState('major:C');
+  const [minorForm, setMinorForm] = useState<MinorForm>('natural');
   const [notation, setNotation] = useState<Notation>('notes');
   const [selectedRoots, setSelectedRoots] = useState<readonly Degree[]>([]);
-  const key = majorKeyNamed(tonic);
-  const thirdLinks = thirdLinksIn(key);
-  const selectedTriads = selectedRoots.map(root => triadIn(key, root));
+  const choice = keyChoiceNamed(keyId);
+  const field = harmonicFieldFor(choice, minorForm);
+  const thirdLinks = thirdLinksIn(field);
+  const selectedTriads = selectedRoots.map(root => triadIn(field, root));
 
-  const selectKey = (nextTonic: string) => {
-    setTonic(nextTonic);
+  const selectKey = (nextKeyId: string) => {
+    setKeyId(nextKeyId);
+    setSelectedRoots([]);
+  };
+
+  const selectMinorForm = (nextForm: MinorForm) => {
+    setMinorForm(nextForm);
     setSelectedRoots([]);
   };
 
@@ -45,10 +60,21 @@ export const App = () => {
         </div>
         <div class="view-controls">
           <label>Key
-            <select value={tonic} onChange={event => selectKey(event.currentTarget.value)}>
-              {majorKeys.map(option => <option value={option.tonic}>{option.tonic} major</option>)}
+            <select value={keyId} onChange={event => selectKey(event.currentTarget.value)}>
+              <optgroup label="Major">
+                {keyChoices.filter(option => option.mode === 'major').map(option => <option value={option.id}>{option.tonic} major</option>)}
+              </optgroup>
+              <optgroup label="Minor">
+                {keyChoices.filter(option => option.mode === 'minor').map(option => <option value={option.id}>{option.tonic} minor</option>)}
+              </optgroup>
             </select>
           </label>
+          {choice.mode === 'minor' && <label>Minor form
+            <select value={minorForm} onChange={event => selectMinorForm(event.currentTarget.value as MinorForm)}>
+              <option value="natural">Natural minor</option>
+              <option value="harmonic">Harmonic minor · raised 7th</option>
+            </select>
+          </label>}
           <label>View
             <select value={notation} onChange={event => setNotation(event.currentTarget.value as Notation)}>
               <option value="notes">Note names</option>
@@ -73,21 +99,21 @@ export const App = () => {
               {thirdLinks.map(link => (
                 <line
                   class={`third-link third-link--${link.interval}`}
-                  x1={sourceCircleLayout[link.from].x}
-                  y1={sourceCircleLayout[link.from].y}
-                  x2={sourceCircleLayout[link.to].x}
-                  y2={sourceCircleLayout[link.to].y}
+                  x1={sourceCircleLayout[degreeIn(field, link.from).geometry].x}
+                  y1={sourceCircleLayout[degreeIn(field, link.from).geometry].y}
+                  x2={sourceCircleLayout[degreeIn(field, link.to).geometry].x}
+                  y2={sourceCircleLayout[degreeIn(field, link.to).geometry].y}
                 />
               ))}
               {selectedTriads.map(triad => (
                 <polyline
-                  class={`selection selection--${degreeIn(key, triad.root).function}`}
-                  points={chordPath(triad)}
+                  class={`selection selection--${degreeIn(field, triad.root).function}`}
+                  points={chordPath(field, triad)}
                 />
               ))}
             </svg>
-            {key.degrees.map(node => {
-              const { x, y } = sourceCircleLayout[node.degree];
+            {field.degrees.map(node => {
+              const { x, y } = sourceCircleLayout[node.geometry];
               const selected = selectedRoots.includes(node.degree);
               return (
                 <div class="degree-slot" style={{ left: `${x}%`, top: `${y}%` }}>
@@ -118,21 +144,21 @@ export const App = () => {
             <ul class="chord-list">
               {selectedTriads.map(triad => (
                 <li>
-                  <strong>{notation === 'notes' ? chordName(key, triad.root) : `${triad.root} ${triad.quality}`}</strong>
-                  <span>{notation === 'notes' ? `${triad.root} · ${chordNotes(key, triad)}` : triad.members.join(' · ')}</span>
+                  <strong>{notation === 'notes' ? chordName(field, triad.root) : `${triad.root} ${triad.quality}`}</strong>
+                  <span>{notation === 'notes' ? `${triad.root} · ${chordNotes(field, triad)}` : triad.members.join(' · ')}</span>
                 </li>
               ))}
             </ul>
-          ) : <p>{notation === 'notes' ? `Tap ${key.tonic} to shade its tonic chord.` : 'Tap a degree to reveal its chord path.'} Select more roots to compare overlapping chords.</p>}
+          ) : <p>{notation === 'notes' ? `Tap ${field.tonic} to shade its tonic chord.` : 'Tap a degree to reveal its chord path.'} Select more roots to compare overlapping chords.</p>}
           {selectedTriads.length > 0 && <button class="clear" onClick={() => setSelectedRoots([])}>Clear selection</button>}
 
           <div class="function-reading">
             <p class="eyebrow">FUNCTIONAL FAMILIES</p>
             <dl>
-              {(['stability', 'change', 'tension'] as const).map(functionName => (
+              {functionNames.filter(functionName => field.degrees.some(node => node.function === functionName)).map(functionName => (
                 <div class={`function-family function-family--${functionName}`}>
                   <dt>{functionLabel[functionName]}</dt>
-                  <dd>{key.degrees.filter(node => node.function === functionName).map(node => node.degree).join(' · ')}</dd>
+                  <dd>{field.degrees.filter(node => node.function === functionName).map(node => node.degree).join(' · ')}</dd>
                 </div>
               ))}
             </dl>
@@ -141,7 +167,7 @@ export const App = () => {
       </main>
 
       <section class="source-note">
-        <strong>First lens, not the whole system.</strong> This view holds one {key.tonic}-major field. Adjacent-key comparison, progression paths, and the full Circle of Fifths remain separate future projections of the same harmonic facts.
+        <strong>First lens, not the whole system.</strong> This view holds one {fieldName(field)} field. {field.minorForm === 'natural' && 'Natural minor retains its relative major’s pitch collection; only the tonal centre changes.'} {field.minorForm === 'harmonic' && 'Harmonic minor raises the leading tone so V and vii° can create dominant tension.'} Adjacent-key comparison, progression paths, and the full Circle of Fifths remain separate future projections of the same harmonic facts.
       </section>
 
       <footer>Available offline after the first online visit.</footer>

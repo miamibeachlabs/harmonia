@@ -2,15 +2,18 @@
 
 An offline-first personal lab for seeing harmonic structure through distinct,
 complementary representations. The first study is an interactive Circle of
-Thirds in C major, based on a supplied reference diagram.
+Thirds, based on a supplied reference diagram. It opens in C major and can
+also compare every common major or minor tonic.
 
 The application has a small pure musical core in `src/domain/`. Preact and SVG
 form only its first visual projection in `src/ui/`.
 
-`src/domain/majorKey.ts` names the harmonic field; `src/projections/` holds
-the source-specific drawing geometry. `notes/circle-of-thirds.md` records what
-the reference visibly establishes and the questions Harmonia deliberately does
-not answer yet.
+`src/domain/harmonicField.ts` names key choices, pitch collections, triads,
+and their functional reading. Natural minor preserves its relative-major
+geometry; harmonic minor explicitly raises the leading tone, creating `V` and
+`vii°` dominant tension. `src/projections/` holds the source-specific drawing
+geometry. `notes/circle-of-thirds.md` records what the reference visibly
+establishes and the questions Harmonia deliberately does not answer yet.
 
 ## Commands
 
