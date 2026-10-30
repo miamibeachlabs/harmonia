@@ -12,6 +12,7 @@ from choices that still need confirmation from its author/source.
 - The three minor diatonic triads are D–F–A, E–G–B, and A–C–E; B–D–F is diminished.
 - Selecting a root shades its three chord tones. Multiple chord selections reveal their overlap.
 - The asymmetric edge lengths are meaningful: major thirds (four semitones) receive a visibly larger geometric span than minor thirds (three semitones). Chord quality does not affect link strength. Harmonia deliberately exaggerates this difference for legibility; the exact source measurement remains unknown.
+- Node hue encodes harmonic function: Stability (I, iii, vi), Change (ii, IV), and Tension (V, vii°). Shape encodes triad quality: square for major, circle for minor, and diamond for diminished.
 
 ## Deliberately not asserted yet
 

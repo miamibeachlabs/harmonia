@@ -44,21 +44,18 @@ footer { margin-top: 28px; font-size: .875rem; }
 .third-link--major-third { stroke: var(--ink); stroke-opacity: .55; stroke-width: 1.35; }
 .third-link--minor-third { stroke: var(--muted); stroke-opacity: .48; stroke-width: .8; }
 .selection { pointer-events: none; stroke: none; }
-.selection--major { fill: color-mix(in srgb, var(--coral) 22%, transparent); }
-.selection--minor { fill: color-mix(in srgb, var(--sun) 19%, transparent); }
-.selection--diminished { fill: color-mix(in srgb, var(--seafoam) 30%, transparent); }
+.selection--stability { fill: color-mix(in srgb, var(--seafoam) 47%, transparent); }
+.selection--change { fill: color-mix(in srgb, var(--sun) 30%, transparent); }
+.selection--tension { fill: color-mix(in srgb, var(--coral) 28%, transparent); }
 .degree-node { position: absolute; z-index: 1; display: grid; place-items: center; width: 50px; height: 50px; min-height: 0; padding: 0; border: 2px solid var(--ink); color: var(--ink); transform: translate(-50%, -50%); transition: transform .15s ease, box-shadow .15s ease; }
-.degree-node:hover { transform: translate(-50%, -50%) scale(1.08); background: inherit; }
+.degree-node:hover { transform: translate(-50%, -50%) scale(1.08); filter: brightness(.96); }
 .degree-node.is-selected { box-shadow: 0 0 0 5px color-mix(in srgb, var(--turquoise) 24%, transparent); }
-.degree-node--I, .degree-node--ii, .degree-node--iii { border-radius: 3px; }
-.degree-node--IV, .degree-node--V, .degree-node--vi, .degree-node--vii\° { border-radius: 50%; }
-.degree-node--I { background: #e32d5f; color: white; }
-.degree-node--ii { background: #f79828; color: white; }
-.degree-node--iii { background: #f4e42d; }
-.degree-node--IV { background: #af2ba3; color: white; }
-.degree-node--V { background: #f15b36; color: white; }
-.degree-node--vi { background: #f9bd2a; }
-.degree-node--vii\° { background: #b7dc3c; }
+.degree-node--major { border-radius: 3px; }
+.degree-node--minor { border-radius: 50%; }
+.degree-node--diminished { border-radius: 0; clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
+.degree-node--stability, .degree-node--stability:hover { background: var(--seafoam); }
+.degree-node--change, .degree-node--change:hover { background: #f4cb55; }
+.degree-node--tension, .degree-node--tension:hover { color: white; background: var(--coral); }
 .degree-node .note { font-size: 1.55rem; font-weight: 800; letter-spacing: -.07em; line-height: .9; }
 .degree-node .numeral { position: absolute; top: calc(100% + 5px); color: var(--ink); font-family: Georgia, serif; font-size: 1rem; font-weight: 700; line-height: 1; white-space: nowrap; }
 .legend { display: flex; flex-wrap: wrap; gap: 8px 18px; justify-content: center; margin-top: 8px; color: var(--muted); font-size: .8rem; }
@@ -77,7 +74,11 @@ footer { margin-top: 28px; font-size: .875rem; }
 .function-reading .eyebrow { margin-bottom: 12px; }
 dl { display: grid; gap: 10px; margin: 0; }
 dl div { display: grid; grid-template-columns: 1fr auto; gap: 12px; }
-dt { font-weight: 700; }
+dt { display: inline-flex; align-items: center; gap: 7px; font-weight: 700; }
+dt::before { width: 10px; height: 10px; content: ''; border: 1px solid var(--ink); border-radius: 50%; }
+.function-family--stability dt::before { background: var(--seafoam); }
+.function-family--change dt::before { background: #f4cb55; }
+.function-family--tension dt::before { background: var(--coral); }
 dd { margin: 0; color: var(--muted); font-family: Georgia, serif; }
 .source-note { padding: 16px 20px; margin-top: 20px; color: var(--muted); background: color-mix(in srgb, var(--seafoam) 18%, var(--surface)); border-left: 3px solid var(--turquoise); line-height: 1.55; }
 .source-note strong { color: var(--ink); }

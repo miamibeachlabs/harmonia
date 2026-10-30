@@ -59,14 +59,19 @@ export const App = () => {
                   y2={sourceCircleLayout[link.to].y}
                 />
               ))}
-              {selectedTriads.map(triad => <polygon class={`selection selection--${triad.quality}`} points={chordPath(triad)} />)}
+              {selectedTriads.map(triad => (
+                <polygon
+                  class={`selection selection--${degreeIn(key, triad.root).function}`}
+                  points={chordPath(triad)}
+                />
+              ))}
             </svg>
             {key.degrees.map(node => {
               const { x, y } = sourceCircleLayout[node.degree];
               const selected = selectedRoots.includes(node.degree);
               return (
                 <button
-                  class={`degree-node degree-node--${node.degree} ${selected ? 'is-selected' : ''}`}
+                  class={`degree-node degree-node--${node.quality} degree-node--${node.function} ${selected ? 'is-selected' : ''}`}
                   style={{ left: `${x}%`, top: `${y}%` }}
                   aria-pressed={selected}
                   aria-label={`${selected ? 'Hide' : 'Show'} ${node.note} ${node.quality} chord, ${node.degree}`}
@@ -99,7 +104,7 @@ export const App = () => {
             <p class="eyebrow">FUNCTIONAL FAMILIES</p>
             <dl>
               {(['stability', 'change', 'tension'] as const).map(functionName => (
-                <div>
+                <div class={`function-family function-family--${functionName}`}>
                   <dt>{functionLabel[functionName]}</dt>
                   <dd>{key.degrees.filter(node => node.function === functionName).map(node => node.degree).join(' · ')}</dd>
                 </div>
