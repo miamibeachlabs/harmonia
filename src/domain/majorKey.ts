@@ -62,6 +62,27 @@ export const majorKey = (tonic: string, notes: readonly string[]): MajorKey => (
 
 export const cMajor = majorKey('C', ['C', 'D', 'E', 'F', 'G', 'A', 'B']);
 
+export const majorKeys: readonly MajorKey[] = [
+  cMajor,
+  majorKey('G', ['G', 'A', 'B', 'C', 'D', 'E', 'F♯']),
+  majorKey('D', ['D', 'E', 'F♯', 'G', 'A', 'B', 'C♯']),
+  majorKey('A', ['A', 'B', 'C♯', 'D', 'E', 'F♯', 'G♯']),
+  majorKey('E', ['E', 'F♯', 'G♯', 'A', 'B', 'C♯', 'D♯']),
+  majorKey('B', ['B', 'C♯', 'D♯', 'E', 'F♯', 'G♯', 'A♯']),
+  majorKey('F♯', ['F♯', 'G♯', 'A♯', 'B', 'C♯', 'D♯', 'E♯']),
+  majorKey('D♭', ['D♭', 'E♭', 'F', 'G♭', 'A♭', 'B♭', 'C']),
+  majorKey('A♭', ['A♭', 'B♭', 'C', 'D♭', 'E♭', 'F', 'G']),
+  majorKey('E♭', ['E♭', 'F', 'G', 'A♭', 'B♭', 'C', 'D']),
+  majorKey('B♭', ['B♭', 'C', 'D', 'E♭', 'F', 'G', 'A']),
+  majorKey('F', ['F', 'G', 'A', 'B♭', 'C', 'D', 'E']),
+];
+
+export const majorKeyNamed = (tonic: string): MajorKey => {
+  const found = majorKeys.find(key => key.tonic === tonic);
+  if (!found) throw new Error(`${tonic} major is not available.`);
+  return found;
+};
+
 export const degreeIn = (key: MajorKey, degree: Degree): DegreeInKey => {
   const found = key.degrees.find(item => item.degree === degree);
   if (!found) throw new Error(`${degree} is not present in ${key.tonic} major.`);

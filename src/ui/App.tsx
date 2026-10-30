@@ -1,9 +1,8 @@
 import { useState } from 'preact/hooks';
-import { cMajor, chordName, degreeIn, thirdLinksIn, triadIn, type Degree, type DiatonicTriad } from '../domain/majorKey.ts';
+import { chordName, degreeIn, majorKeyNamed, majorKeys, thirdLinksIn, triadIn, type Degree, type DiatonicTriad, type MajorKey } from '../domain/majorKey.ts';
 import { sourceCircleLayout } from '../projections/circleOfThirds.ts';
 
-const key = cMajor;
-const thirdLinks = thirdLinksIn(key);
+type Notation = 'notes' | 'roman';
 
 const point = (degree: Degree) => {
   const { x, y } = sourceCircleLayout[degree];
@@ -11,7 +10,7 @@ const point = (degree: Degree) => {
 };
 
 const chordPath = (triad: DiatonicTriad) => triad.members.map(point).join(' ');
-const chordNotes = (triad: DiatonicTriad) => triad.members.map(degree => degreeIn(key, degree).note).join(' · ');
+const chordNotes = (key: MajorKey, triad: DiatonicTriad) => triad.members.map(degree => degreeIn(key, degree).note).join(' · ');
 
 const functionLabel = {
   stability: 'Stability',
@@ -20,8 +19,17 @@ const functionLabel = {
 } as const;
 
 export const App = () => {
+  const [tonic, setTonic] = useState('C');
+  const [notation, setNotation] = useState<Notation>('notes');
   const [selectedRoots, setSelectedRoots] = useState<readonly Degree[]>([]);
+  const key = majorKeyNamed(tonic);
+  const thirdLinks = thirdLinksIn(key);
   const selectedTriads = selectedRoots.map(root => triadIn(key, root));
+
+  const selectKey = (nextTonic: string) => {
+    setTonic(nextTonic);
+    setSelectedRoots([]);
+  };
 
   const toggleChord = (root: Degree) =>
     setSelectedRoots(selected => selected.includes(root)
@@ -35,7 +43,19 @@ export const App = () => {
           <p class="eyebrow">HARMONIA · FIRST STUDY</p>
           <h1>Circle of thirds<span>.</span></h1>
         </div>
-        <p class="key">C major</p>
+        <div class="view-controls">
+          <label>Key
+            <select value={tonic} onChange={event => selectKey(event.currentTarget.value)}>
+              {majorKeys.map(option => <option value={option.tonic}>{option.tonic} major</option>)}
+            </select>
+          </label>
+          <label>View
+            <select value={notation} onChange={event => setNotation(event.currentTarget.value as Notation)}>
+              <option value="notes">Note names</option>
+              <option value="roman">Roman numerals</option>
+            </select>
+          </label>
+        </div>
       </header>
 
       <main class="study">
@@ -70,16 +90,17 @@ export const App = () => {
               const { x, y } = sourceCircleLayout[node.degree];
               const selected = selectedRoots.includes(node.degree);
               return (
-                <button
-                  class={`degree-node degree-node--${node.quality} degree-node--${node.function} ${selected ? 'is-selected' : ''}`}
-                  style={{ left: `${x}%`, top: `${y}%` }}
-                  aria-pressed={selected}
-                  aria-label={`${selected ? 'Hide' : 'Show'} ${node.note} ${node.quality} chord, ${node.degree}`}
-                  onClick={() => toggleChord(node.degree)}
-                >
-                  <span class="note">{node.note}</span>
-                  <span class="numeral">{node.degree}</span>
-                </button>
+                <div class="degree-slot" style={{ left: `${x}%`, top: `${y}%` }}>
+                  <button
+                    class={`degree-node degree-node--${node.quality} degree-node--${node.function} ${notation === 'roman' ? 'is-abstract' : ''} ${selected ? 'is-selected' : ''}`}
+                    aria-pressed={selected}
+                    aria-label={`${selected ? 'Hide' : 'Show'} ${node.note} ${node.quality} chord, ${node.degree}`}
+                    onClick={() => toggleChord(node.degree)}
+                  >
+                    <span class="note">{notation === 'notes' ? node.note : node.degree}</span>
+                  </button>
+                  {notation === 'notes' && <span class="numeral">{node.degree}</span>}
+                </div>
               );
             })}
           </div>
@@ -95,9 +116,14 @@ export const App = () => {
           <h2 id="reading-title">{selectedTriads.length ? 'Selected chords' : 'Nothing selected yet'}</h2>
           {selectedTriads.length ? (
             <ul class="chord-list">
-              {selectedTriads.map(triad => <li><strong>{chordName(key, triad.root)}</strong><span>{triad.root} · {chordNotes(triad)}</span></li>)}
+              {selectedTriads.map(triad => (
+                <li>
+                  <strong>{notation === 'notes' ? chordName(key, triad.root) : `${triad.root} ${triad.quality}`}</strong>
+                  <span>{notation === 'notes' ? `${triad.root} · ${chordNotes(key, triad)}` : triad.members.join(' · ')}</span>
+                </li>
+              ))}
             </ul>
-          ) : <p>Tap C to shade C–E–G. Select more roots to compare overlapping chords.</p>}
+          ) : <p>{notation === 'notes' ? `Tap ${key.tonic} to shade its tonic chord.` : 'Tap a degree to reveal its chord path.'} Select more roots to compare overlapping chords.</p>}
           {selectedTriads.length > 0 && <button class="clear" onClick={() => setSelectedRoots([])}>Clear selection</button>}
 
           <div class="function-reading">
@@ -115,7 +141,7 @@ export const App = () => {
       </main>
 
       <section class="source-note">
-        <strong>First lens, not the whole system.</strong> This view holds one C-major field. Adjacent-key comparison, progression paths, and the full Circle of Fifths remain separate future projections of the same harmonic facts.
+        <strong>First lens, not the whole system.</strong> This view holds one {key.tonic}-major field. Adjacent-key comparison, progression paths, and the full Circle of Fifths remain separate future projections of the same harmonic facts.
       </section>
 
       <footer>Available offline after the first online visit.</footer>
