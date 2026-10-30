@@ -11,7 +11,7 @@ from choices that still need confirmation from its author/source.
 - The three major diatonic triads are C–E–G, F–A–C, and G–B–D.
 - The three minor diatonic triads are D–F–A, E–G–B, and A–C–E; B–D–F is diminished.
 - Selecting a root shades its three chord tones. Multiple chord selections reveal their overlap.
-- The asymmetric edge lengths are meaningful: major thirds (four semitones) and minor thirds (three semitones) receive distinct, consistent treatment. Chord quality does not affect link strength.
+- The asymmetric edge lengths are meaningful: major thirds (four semitones) receive a visibly larger geometric span than minor thirds (three semitones). Chord quality does not affect link strength. Harmonia deliberately exaggerates this difference for legibility; the exact source measurement remains unknown.
 
 ## Deliberately not asserted yet
 

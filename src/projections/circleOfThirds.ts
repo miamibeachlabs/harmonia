@@ -1,18 +1,50 @@
 import type { Degree } from '../domain/majorKey.ts';
 
 /**
- * The source's asymmetric, circle-of-fifths embedding. This is a projection
- * of a key, deliberately kept outside the musical model.
+ * A circle-of-thirds embedding. Major thirds receive a visibly larger arc than
+ * minor thirds, so their differing sizes are carried by the geometry itself.
+ *
+ * The ratio is a legibility choice for this study, not a claimed measurement
+ * of the source artwork. This remains a projection, separate from the key.
  */
 export type Point = Readonly<{ x: number; y: number }>;
 export type CircleOfThirdsLayout = Readonly<Record<Degree, Point>>;
 
-export const sourceCircleLayout: CircleOfThirdsLayout = {
-  I: { x: 50, y: 78 },
-  ii: { x: 35, y: 16 },
-  iii: { x: 88, y: 82 },
-  IV: { x: 25, y: 43 },
-  V: { x: 78, y: 54 },
-  vi: { x: 19, y: 76 },
-  'vii°': { x: 64, y: 22 },
+const degreesAroundThirds: readonly [Degree, ...Degree[]] = [
+  'I', 'iii', 'V', 'vii°', 'ii', 'IV', 'vi',
+];
+
+const majorThirdArc = 68;
+const minorThirdArc = 39;
+const outgoingArc: Readonly<Record<Degree, number>> = {
+  I: majorThirdArc,
+  ii: minorThirdArc,
+  iii: minorThirdArc,
+  IV: majorThirdArc,
+  V: majorThirdArc,
+  vi: minorThirdArc,
+  'vii°': minorThirdArc,
 };
+
+const pointAt = (angle: number): Point => {
+  const radius = 37;
+  const radians = angle * Math.PI / 180;
+  return {
+    x: 50 + radius * Math.cos(radians),
+    y: 50 + radius * Math.sin(radians),
+  };
+};
+
+const layout = (): CircleOfThirdsLayout => {
+  let angle = 90;
+  const points = {} as Record<Degree, Point>;
+
+  for (const degree of degreesAroundThirds) {
+    points[degree] = pointAt(angle);
+    angle -= outgoingArc[degree];
+  }
+
+  return points;
+};
+
+export const sourceCircleLayout = layout();
