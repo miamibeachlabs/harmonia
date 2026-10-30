@@ -1,5 +1,4 @@
 import { render } from 'preact';
-import '../styles.css';
 import { App } from './ui/App.tsx';
 
 const root = document.querySelector('#app');
