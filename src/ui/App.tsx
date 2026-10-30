@@ -3,8 +3,6 @@ import { cMajor, chordName, degreeIn, triadIn, type Degree, type DiatonicTriad }
 import { sourceCircleLayout } from '../projections/circleOfThirds.ts';
 
 const key = cMajor;
-const fifthOrder: readonly Degree[] = ['I', 'V', 'ii', 'vi', 'iii', 'vii°', 'IV'];
-const fifthRoute: readonly Degree[] = [...fifthOrder, 'I'];
 
 const point = (degree: Degree) => {
   const { x, y } = sourceCircleLayout[degree];
@@ -51,7 +49,6 @@ export const App = () => {
 
           <div class="circle-stage">
             <svg class="circle" viewBox="0 0 100 100" aria-hidden="true">
-              <polyline class="outer-loop" points={fifthRoute.map(point).join(' ')} />
               {key.triads.map(triad => <polygon class={`triad triad--${triad.quality}`} points={polygon(triad)} />)}
               {selectedTriads.map(triad => <polygon class={`selection selection--${triad.quality}`} points={polygon(triad)} />)}
             </svg>
@@ -76,7 +73,6 @@ export const App = () => {
           <div class="legend" aria-label="Diagram legend">
             <span><i class="legend-line legend-line--major" />major triad</span>
             <span><i class="legend-line legend-line--minor" />minor triad</span>
-            <span><i class="legend-line" />fifth-order route</span>
           </div>
         </section>
 

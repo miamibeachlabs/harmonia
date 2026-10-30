@@ -7,7 +7,7 @@ from choices that still need confirmation from its author/source.
 ## Directly observed
 
 - The seven degrees of C major are C, D, E, F, G, A, B, with Roman numerals I, ii, iii, IV, V, vi, vii°.
-- The visible outer route follows circle-of-fifths order: C → G → D → A → E → B → F → C.
+- Circle-of-fifths order explains the placement, but is not rendered as an edge path. The visible edges belong to chord triangles only.
 - The three major diatonic triads are C–E–G, F–A–C, and G–B–D.
 - The three minor diatonic triads are D–F–A, E–G–B, and A–C–E; B–D–F is diminished.
 - Selecting a root shades its three chord tones. Multiple chord selections reveal their overlap.
