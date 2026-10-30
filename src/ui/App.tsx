@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'preact/hooks';
 import { chordName, chordPitchClasses, degreeIn, harmonicFieldFor, keyCollectionNamed, keyCollections, thirdLinksIn, triadIn, type Degree, type DiatonicTriad, type HarmonicField, type KeyMode, type MinorForm } from '../domain/harmonicField.ts';
 import { sourceCircleLayout } from '../projections/circleOfThirds.ts';
+import { ChordGlyph } from './ChordGlyph.tsx';
 import { PianoKeyboard } from './PianoKeyboard.tsx';
 import { rootHueClass } from './rootHue.ts';
 
@@ -165,12 +166,17 @@ export const App = () => {
           <h2 id="reading-title">{selectedTriads.length ? 'Selected chords' : 'Nothing selected yet'}</h2>
           {selectedTriads.length ? (
             <ul class="chord-list">
-              {selectedTriads.map(triad => (
-                <li>
-                  <strong>{notation === 'notes' ? chordName(field, triad.root) : `${triad.root} ${triad.quality}`}</strong>
-                  <span>{notation === 'notes' ? `${triad.root} · ${chordNotes(field, triad)}` : triad.members.join(' · ')}</span>
-                </li>
-              ))}
+              {selectedTriads.map(triad => {
+                const root = degreeIn(field, triad.root);
+                const name = notation === 'notes' ? chordName(field, triad.root) : `${triad.root} ${triad.quality}`;
+                return <li>
+                  <ChordGlyph rootHue={rootHueClass(root.note)} pitchClasses={chordPitchClasses(field, triad)} label={`${name} on one octave of piano keys`} />
+                  <div>
+                    <strong>{name}</strong>
+                    <span>{notation === 'notes' ? `${triad.root} · ${chordNotes(field, triad)}` : triad.members.join(' · ')}</span>
+                  </div>
+                </li>;
+              })}
             </ul>
           ) : <p>{notation === 'notes' ? `Tap ${field.tonic} to shade its tonic chord.` : 'Tap a degree to reveal its chord path.'} Select more roots to compare overlapping chords.</p>}
           {selectedTriads.length > 0 && <button class="clear" onClick={() => setSelectedChordIds([])}>Clear selection</button>}

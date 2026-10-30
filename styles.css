@@ -82,7 +82,12 @@ h2 { margin: 0; font-size: 1.2rem; font-weight: 650; letter-spacing: -.02em; }
 .reading { margin-top: 28px; }
 .reading p:last-child { margin-bottom: 0; }
 .chord-list { display: grid; gap: 10px; padding: 0; margin: 18px 0; list-style: none; }
-.chord-list li { display: grid; gap: 2px; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+.chord-list li { display: flex; align-items: center; gap: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+.chord-list li > div { display: grid; gap: 2px; }
+.chord-glyph { flex: 0 0 auto; width: 82px; height: auto; }
+.chord-glyph__white { fill: var(--surface); stroke: var(--ink); stroke-width: .1; }
+.chord-glyph__black { fill: var(--ink); stroke: var(--ink); stroke-width: .1; }
+.chord-glyph rect.is-selected { fill: var(--root-color); }
 .chord-list strong { color: var(--ink); }
 .chord-list span { color: var(--muted); font-size: .9rem; }
 .clear { width: 100%; margin-top: 4px; }
@@ -90,7 +95,7 @@ h2 { margin: 0; font-size: 1.2rem; font-weight: 650; letter-spacing: -.02em; }
 .piano { display: block; width: 100%; height: auto; overflow: visible; }
 .piano-key--white rect { fill: var(--surface); stroke: var(--ink); stroke-width: .08; }
 .piano-key--black rect { fill: var(--ink); }
-.piano-dot { fill: var(--root-color); stroke: var(--ink); stroke-width: .07; }
+.piano .piano-dot { fill: var(--root-color); stroke: var(--ink); stroke-width: .07; }
 .keyboard-chord-list { display: flex; flex-wrap: wrap; gap: 8px 18px; padding: 0; margin: 0; list-style: none; }
 .keyboard-chord-list li { display: inline-flex; align-items: baseline; gap: 5px; }
 .keyboard-chord-list li::before { width: 10px; height: 10px; content: ''; border: 1px solid var(--ink); border-radius: 50%; }
