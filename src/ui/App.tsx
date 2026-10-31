@@ -26,7 +26,11 @@ export const App = () => {
   const choice = mode === 'major' ? collection.major : collection.relativeMinor;
   const field = harmonicFieldFor(choice, minorForm);
   const thirdLinks = thirdLinksIn(field);
-  const selectedTriads = field.triads.filter(triad => selectedChordIds.includes(chordIdentity(field, triad)));
+  const triadByIdentity = new Map(field.triads.map(triad => [chordIdentity(field, triad), triad]));
+  const selectedTriads = selectedChordIds.flatMap(identity => {
+    const triad = triadByIdentity.get(identity);
+    return triad ? [triad] : [];
+  });
 
   useEffect(() => {
     const available = new Set(field.triads.map(triad => chordIdentity(field, triad)));
