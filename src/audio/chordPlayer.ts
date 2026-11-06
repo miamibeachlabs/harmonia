@@ -116,7 +116,7 @@ export const createChordPlayer = () => {
         for (let beat = 0; beat < beatsPerChord; beat += 1) {
           const when = firstChordAt + (chordIndex * beatsPerChord + beat) * beatLength;
           voicing.forEach(midi => playNote(midi, when, 'chord'));
-          playNote(bass, when, 'bass');
+          if (beat === 0) playNote(bass, when, 'bass');
         }
       });
     },

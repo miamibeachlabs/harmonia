@@ -15,7 +15,7 @@ filter, and very small generated room are an intentionally warm sketch sound,
 not a claim to be a sampled piano.
 
 Each chord occupies a four-beat bar. The voiced triad is articulated on every
-beat while its root sounds one octave lower as a bass pulse. The compact chord
+beat while its root sounds one octave lower on the first beat. The compact chord
 glyph deliberately shows only the three voice-led harmony notes; the bass is
 rhythmic accompaniment, not a fourth chord tone. All glyphs use the same
 two-octave window, positioned to contain the sequence's lowest voice.
