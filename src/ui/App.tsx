@@ -15,6 +15,7 @@ const point = (field: HarmonicField, degree: Degree) => {
 const chordPath = (field: HarmonicField, triad: DiatonicTriad) => triad.members.map(degree => point(field, degree)).join(' ');
 const chordNotes = (field: HarmonicField, triad: DiatonicTriad) => triad.members.map(degree => degreeIn(field, degree).note).join(' · ');
 const chordIdentity = (field: HarmonicField, triad: DiatonicTriad) => chordPitchClasses(field, triad).toSorted((a, b) => a - b).join(':');
+const nodeName = (note: string, quality: DiatonicTriad['quality']) => quality === 'minor' ? `${note}m` : note;
 
 export const App = () => {
   const [collectionId, setCollectionId] = useState('C');
@@ -151,7 +152,7 @@ export const App = () => {
                     aria-label={`${selected ? 'Hide' : 'Show'} ${node.note} ${node.quality} chord, ${node.degree}`}
                     onClick={() => toggleChord(triad)}
                   >
-                    <span class="note">{notation === 'notes' ? node.note : node.degree}</span>
+                    <span class="note">{notation === 'notes' ? nodeName(node.note, node.quality) : node.degree}</span>
                   </button>
                   {notation === 'notes' && <span class="numeral">{node.degree}</span>}
                 </div>
