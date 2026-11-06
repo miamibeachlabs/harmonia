@@ -71,7 +71,7 @@ export const App = () => {
         <div class="view-controls">
           <label>Key
             <select value={collectionId} onChange={event => selectCollection(event.currentTarget.value)}>
-              {keyCollections.map(option => <option value={option.id}>{option.major.tonic} (${option.relativeMinor.tonic}m)</option>)}
+              {keyCollections.map(option => <option value={option.id}>{option.major.tonic} ({option.relativeMinor.tonic}m)</option>)}
             </select>
           </label>
           <label>Progression
