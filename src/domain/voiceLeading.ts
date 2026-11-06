@@ -9,7 +9,7 @@ export type VoicingRegister = Readonly<{
 }>;
 
 /** A fixed window centred on the canonical C4–E4–G4 reference triad. */
-export const voicingRegister: VoicingRegister = { midiStart: 55, midiEnd: 74 }; // G3–D5
+export const voicingRegister: VoicingRegister = { midiStart: 53, midiEnd: 74 }; // F3–D5
 
 const lowestVoice = voicingRegister.midiStart;
 const highestVoice = voicingRegister.midiEnd;
