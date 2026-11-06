@@ -99,7 +99,7 @@ export const App = () => {
     <div class="workspace">
       <header class="masthead">
         <div>
-          <p class="eyebrow">FIRST STUDY</p>
+          <p class="eyebrow">A MIAMI BEACH LABS APP</p>
           <h1>Harmonia<span>.</span></h1>
         </div>
         <div class="view-controls">
