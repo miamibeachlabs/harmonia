@@ -5,14 +5,14 @@ export type SoundingChord = Readonly<{
 
 export type VoicingRegister = Readonly<{
   midiStart: number;
-  octaves: number;
+  midiEnd: number;
 }>;
 
-/** The shared C3–C5 space for voice-leading and compact keyboard glyphs. */
-export const voicingRegister: VoicingRegister = { midiStart: 48, octaves: 2 };
+/** A fixed window centred on the canonical C4–E4–G4 reference triad. */
+export const voicingRegister: VoicingRegister = { midiStart: 55, midiEnd: 74 }; // G3–D5
 
 const lowestVoice = voicingRegister.midiStart;
-const highestVoice = lowestVoice + voicingRegister.octaves * 12;
+const highestVoice = voicingRegister.midiEnd;
 const referenceVoicing = [60, 64, 67] as const; // C4–E4–G4
 
 const notesFor = (pitchClass: number) => {
@@ -25,38 +25,18 @@ const notesFor = (pitchClass: number) => {
 const distanceFromReference = (voicing: readonly number[]) =>
   voicing.reduce((distance, note, index) => distance + (note - referenceVoicing[index]) ** 2, 0);
 
-/** Chooses the root-position octave placement nearest to C4–E4–G4. */
-const rootPosition = ({ rootPitchClass, pitchClasses }: SoundingChord) => {
-  const candidates = notesFor(rootPitchClass)
-    .map(root => pitchClasses.map(pitchClass => root + (pitchClass - rootPitchClass + 12) % 12))
-    .filter(voicing => voicing.at(-1)! <= highestVoice);
-  const closest = candidates.toSorted((left, right) => distanceFromReference(left) - distanceFromReference(right))[0];
-  if (!closest) throw new Error('No root-position voicing fits the shared register.');
-  return closest;
-};
-
 const voicingsFor = (pitchClasses: readonly number[]) => pitchClasses
   .reduce<readonly number[][]>((partialVoicings, pitchClass) =>
     partialVoicings.flatMap(partial => notesFor(pitchClass).map(note => [...partial, note])), [[]])
   .map(voicing => voicing.toSorted((left, right) => left - right));
 
-/** Keeps every chord tone while choosing the nearest available notes to the last chord. */
-const nearestVoicing = (previous: readonly number[], chord: SoundingChord) =>
-  voicingsFor(chord.pitchClasses).reduce((best, candidate) => {
-    const movement = candidate.reduce((total, note, index) => total + Math.abs(note - previous[index]), 0);
-    const spread = candidate.at(-1)! - candidate[0];
-    const bestMovement = best.reduce((total, note, index) => total + Math.abs(note - previous[index]), 0);
-    const bestSpread = best.at(-1)! - best[0];
-    return movement + spread * 0.03 < bestMovement + bestSpread * 0.03 ? candidate : best;
-  });
-
-/** Gives each chord the close voicing that follows the prior one with least motion. */
-export const voiceLead = (chords: readonly SoundingChord[]): readonly (readonly number[])[] => {
-  const first = chords[0];
-  if (!first) return [];
-
-  return chords.slice(1).reduce<readonly (readonly number[])[]>((voicings, chord) => {
-    const previous = voicings.at(-1)!;
-    return [...voicings, nearestVoicing(previous, chord)];
-  }, [rootPosition(first)]);
+/** The one fixed inversion and register placement assigned to a triad. */
+export const canonicalVoicing = (chord: SoundingChord): readonly number[] => {
+  const closest = voicingsFor(chord.pitchClasses)
+    .toSorted((left, right) => distanceFromReference(left) - distanceFromReference(right))[0];
+  if (!closest) throw new Error('No canonical voicing fits the shared register.');
+  return closest;
 };
+
+/** Applies the same context-independent voicing rule to every chord in a sequence. */
+export const canonicalVoicings = (chords: readonly SoundingChord[]) => chords.map(canonicalVoicing);

@@ -12,13 +12,12 @@ const pitchClassOf = (midi: number) => (midi % 12 + 12) % 12;
 
 /** A compact keyboard window showing the exact notes being played. */
 export const ChordGlyph = ({ rootHue, midiNotes, register, label }: ChordGlyphProps) => {
-  const midiEnd = register.midiStart + register.octaves * 12;
-  const keyboardNotes = Array.from({ length: midiEnd - register.midiStart + 1 }, (_, index) => register.midiStart + index);
+  const keyboardNotes = Array.from({ length: register.midiEnd - register.midiStart + 1 }, (_, index) => register.midiStart + index);
   const whiteKeys = keyboardNotes.filter(midi => whitePitchClasses.has(pitchClassOf(midi)));
   const blackKeys = keyboardNotes.filter(midi => !whitePitchClasses.has(pitchClassOf(midi)));
   const whiteKeyPosition = (midi: number) => whiteKeys.indexOf(midi);
   const blackKeyPosition = (midi: number) => whiteKeys.filter(white => white < midi).length - .34;
-  const width = register.octaves * 7;
+  const width = whiteKeys.length;
 
   return (
     <svg class={`chord-glyph ${rootHue}`} viewBox={`0 0 ${width} 3.2`} role="img" aria-label={label}>

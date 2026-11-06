@@ -2,7 +2,7 @@ import { useEffect, useState } from 'preact/hooks';
 import { createChordPlayer } from '../audio/chordPlayer.ts';
 import { chordName, chordPitchClasses, degreeIn, harmonicFieldFor, keyCollectionNamed, keyCollections, pitchClassOf, thirdLinksIn, triadIn, type Degree, type DiatonicTriad, type HarmonicField } from '../domain/harmonicField.ts';
 import { majorProgressions, progressionNamed } from '../domain/progressions.ts';
-import { voiceLead, voicingRegister } from '../domain/voiceLeading.ts';
+import { canonicalVoicings, voicingRegister } from '../domain/voiceLeading.ts';
 import { sourceCircleLayout } from '../projections/circleOfThirds.ts';
 import { ChordGlyph } from './ChordGlyph.tsx';
 import { MiamiBeachLabsBrand } from './MiamiBeachLabsBrand.tsx';
@@ -55,7 +55,7 @@ export const App = () => {
     rootPitchClass: pitchClassOf(degreeIn(field, triad.root).note),
     pitchClasses: chordPitchClasses(field, triad),
   }));
-  const voicedChords = voiceLead(soundingChords);
+  const voicedChords = canonicalVoicings(soundingChords);
 
   useEffect(() => () => chordPlayer.stop(), [chordPlayer]);
 
