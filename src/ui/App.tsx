@@ -69,9 +69,9 @@ export const App = () => {
           <h1>Circle of thirds<span>.</span></h1>
         </div>
         <div class="view-controls">
-          <label>Key collection
+          <label>Key
             <select value={collectionId} onChange={event => selectCollection(event.currentTarget.value)}>
-              {keyCollections.map(option => <option value={option.id}>{option.major.tonic} major ↔ {option.relativeMinor.tonic} natural minor</option>)}
+              {keyCollections.map(option => <option value={option.id}>{option.major.tonic} (${option.relativeMinor.tonic}m)</option>)}
             </select>
           </label>
           <label>Progression
