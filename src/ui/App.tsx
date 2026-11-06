@@ -100,7 +100,7 @@ export const App = () => {
     <div class="workspace">
       <header class="masthead">
         <div>
-          <h1>Harmonia<span>.</span></h1>
+          <h1>Harmoni<span>a</span></h1>
           <MiamiBeachLabsBrand />
         </div>
         <div class="view-controls">
@@ -123,7 +123,7 @@ export const App = () => {
           <div class="section-heading">
             <div>
               <p class="eyebrow">SOURCE GEOMETRY</p>
-              <h2 id="diagram-title">Circle of thirds.</h2>
+              <h2 id="diagram-title">Circle of thirds</h2>
             </div>
           </div>
 
@@ -218,7 +218,7 @@ export const App = () => {
         <div class="section-heading">
           <div>
             <p class="eyebrow">PIANO KEYBOARD</p>
-            <h2 id="keyboard-title">Every octave.</h2>
+            <h2 id="keyboard-title">Every octave</h2>
           </div>
         </div>
         <PianoKeyboard chords={activeTriads.map(triad => ({
