@@ -67,7 +67,6 @@ h2 { margin: 0; font-size: 1.2rem; font-weight: 650; letter-spacing: -.02em; }
 .degree-node--diminished { border-radius: 0; clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
 .degree-node--augmented { border-radius: 0; clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%); }
 .degree-node .note { font-size: 1.55rem; font-weight: 800; letter-spacing: -.07em; line-height: .9; }
-.degree-node.is-abstract .note { font-family: Georgia, serif; font-size: 1.05rem; letter-spacing: -.04em; }
 .degree-slot .numeral { position: absolute; top: calc(100% + 5px); left: 50%; color: var(--ink); font-family: Georgia, serif; font-size: 1rem; font-weight: 700; line-height: 1; transform: translateX(-50%); white-space: nowrap; }
 .progression-step { position: absolute; top: -8px; right: -10px; display: grid; place-items: center; min-width: 19px; min-height: 19px; padding: 1px 3px; color: var(--surface); background: var(--ink); border: 1px solid var(--surface); border-radius: 99px; font-size: .7rem; font-weight: 800; line-height: 1; }
 .legend { display: flex; flex-wrap: wrap; gap: 8px 18px; justify-content: center; margin-top: 8px; color: var(--muted); font-size: .8rem; }

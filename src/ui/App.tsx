@@ -6,8 +6,6 @@ import { ChordGlyph } from './ChordGlyph.tsx';
 import { PianoKeyboard } from './PianoKeyboard.tsx';
 import { rootHueClass } from './rootHue.ts';
 
-type Notation = 'notes' | 'roman';
-
 const point = (field: HarmonicField, degree: Degree) => {
   const { x, y } = sourceCircleLayout[degreeIn(field, degree).geometry];
   return `${x},${y}`;
@@ -20,7 +18,6 @@ const nodeName = (note: string, quality: DiatonicTriad['quality']) => quality ==
 
 export const App = () => {
   const [collectionId, setCollectionId] = useState('C');
-  const [notation, setNotation] = useState<Notation>('notes');
   const [selectedChordIds, setSelectedChordIds] = useState<readonly string[]>([]);
   const [progressionId, setProgressionId] = useState<string | null>(null);
   const collection = keyCollectionNamed(collectionId);
@@ -80,12 +77,6 @@ export const App = () => {
               {majorProgressions.map(option => <option value={option.id}>{option.name}</option>)}
             </select>
           </label>
-          <label>View
-            <select value={notation} onChange={event => setNotation(event.currentTarget.value as Notation)}>
-              <option value="notes">Note names</option>
-              <option value="roman">Roman numerals</option>
-            </select>
-          </label>
         </div>
       </header>
 
@@ -100,8 +91,8 @@ export const App = () => {
             const root = degreeIn(field, triad.root);
             return <li class={`${rootHueClass(root.note)} keyboard-chord-list--${triad.quality}`}>
               {progression && <em>{index + 1}</em>}
-              <strong>{notation === 'notes' ? chordName(field, triad.root) : `${triad.root} ${triad.quality}`}</strong>
-              <span>{notation === 'notes' ? chordNotes(field, triad) : triad.members.join(' · ')}</span>
+              <strong>{chordName(field, triad.root)}</strong>
+              <span>{chordNotes(field, triad)}</span>
             </li>;
           })}
         </ul>}
@@ -151,14 +142,14 @@ export const App = () => {
               return (
                 <div class="degree-slot" style={{ left: `${x}%`, top: `${y}%` }}>
                   <button
-                    class={`degree-node degree-node--${node.quality} ${rootHueClass(node.note)} ${notation === 'roman' ? 'is-abstract' : ''} ${selected ? 'is-selected' : ''}`}
+                    class={`degree-node degree-node--${node.quality} ${rootHueClass(node.note)} ${selected ? 'is-selected' : ''}`}
                     aria-pressed={selected}
                     aria-label={`${selected ? 'Hide' : 'Show'} ${node.note} ${node.quality} chord, ${node.degree}`}
                     onClick={() => toggleChord(triad)}
                   >
-                    <span class="note">{notation === 'notes' ? nodeName(node.note, node.quality) : node.degree}</span>
+                    <span class="note">{nodeName(node.note, node.quality)}</span>
                   </button>
-                  {notation === 'notes' && <span class="numeral">{node.degree}</span>}
+                  <span class="numeral">{node.degree}</span>
                   {steps.length > 0 && <span class="progression-step">{steps.join('·')}</span>}
                 </div>
               );
@@ -178,18 +169,18 @@ export const App = () => {
             <ul class="chord-list">
               {activeTriads.map((triad, index) => {
                 const root = degreeIn(field, triad.root);
-                const name = notation === 'notes' ? chordName(field, triad.root) : `${triad.root} ${triad.quality}`;
+                const name = chordName(field, triad.root);
                 return <li>
                   {progression && <span class="progression-index">{index + 1}</span>}
                   <ChordGlyph rootHue={rootHueClass(root.note)} pitchClasses={chordPitchClasses(field, triad)} label={`${name} on one octave of piano keys`} />
                   <div>
                     <strong>{name}</strong>
-                    <span>{notation === 'notes' ? `${triad.root} · ${chordNotes(field, triad)}` : triad.members.join(' · ')}</span>
+                    <span>{triad.root} · {chordNotes(field, triad)}</span>
                   </div>
                 </li>;
               })}
             </ul>
-          ) : <p>{notation === 'notes' ? `Tap ${field.tonic} to shade its tonic chord.` : 'Tap a degree to reveal its chord path.'} Select more roots to compare overlapping chords.</p>}
+          ) : <p>Tap {field.tonic} to shade its tonic chord. Select more roots to compare overlapping chords.</p>}
           {!progression && activeTriads.length > 0 && <button class="clear" onClick={() => setSelectedChordIds([])}>Clear selection</button>}
 
         </aside>
