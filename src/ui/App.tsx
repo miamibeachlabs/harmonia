@@ -100,7 +100,7 @@ export const App = () => {
     <div class="workspace">
       <header class="masthead">
         <div>
-          <h1>Harmoni<span>a</span></h1>
+          <h1>Harmonia</h1>
           <MiamiBeachLabsBrand />
         </div>
         <div class="view-controls">
