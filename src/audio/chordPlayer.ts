@@ -13,6 +13,15 @@ type AudioOutput = Readonly<{
 
 const frequencyFor = (midi: number) => 440 * 2 ** ((midi - 69) / 12);
 
+/** WebKit honours this category through iPhone Silent Mode when it is available. */
+const requestPlaybackAudioSession = () => {
+  const session = (navigator as Navigator & {
+    audioSession?: { type: string };
+  }).audioSession;
+
+  if (session) session.type = 'playback';
+};
+
 const generatedRoom = (context: AudioContext) => {
   const duration = 1.1;
   const buffer = context.createBuffer(2, context.sampleRate * duration, context.sampleRate);
@@ -29,6 +38,7 @@ const generatedRoom = (context: AudioContext) => {
 };
 
 const audioOutput = (): AudioOutput => {
+  requestPlaybackAudioSession();
   const context = new AudioContext();
   const input = context.createGain();
   const room = context.createConvolver();
