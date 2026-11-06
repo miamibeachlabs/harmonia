@@ -11,21 +11,28 @@ export type VoicingRegister = Readonly<{
 /** The shared C3–C5 space for voice-leading and compact keyboard glyphs. */
 export const voicingRegister: VoicingRegister = { midiStart: 48, octaves: 2 };
 
-const rootRegister = voicingRegister.midiStart;
 const lowestVoice = voicingRegister.midiStart;
 const highestVoice = lowestVoice + voicingRegister.octaves * 12;
-
-const midiFor = (pitchClass: number, rootPitchClass: number) =>
-  rootRegister + rootPitchClass + (pitchClass - rootPitchClass + 12) % 12;
-
-const rootPosition = ({ rootPitchClass, pitchClasses }: SoundingChord) =>
-  pitchClasses.map(pitchClass => midiFor(pitchClass, rootPitchClass));
+const referenceVoicing = [60, 64, 67] as const; // C4–E4–G4
 
 const notesFor = (pitchClass: number) => {
   const first = lowestVoice + (pitchClass - lowestVoice + 12) % 12;
   const notes: number[] = [];
   for (let note = first; note <= highestVoice; note += 12) notes.push(note);
   return notes;
+};
+
+const distanceFromReference = (voicing: readonly number[]) =>
+  voicing.reduce((distance, note, index) => distance + (note - referenceVoicing[index]) ** 2, 0);
+
+/** Chooses the root-position octave placement nearest to C4–E4–G4. */
+const rootPosition = ({ rootPitchClass, pitchClasses }: SoundingChord) => {
+  const candidates = notesFor(rootPitchClass)
+    .map(root => pitchClasses.map(pitchClass => root + (pitchClass - rootPitchClass + 12) % 12))
+    .filter(voicing => voicing.at(-1)! <= highestVoice);
+  const closest = candidates.toSorted((left, right) => distanceFromReference(left) - distanceFromReference(right))[0];
+  if (!closest) throw new Error('No root-position voicing fits the shared register.');
+  return closest;
 };
 
 const voicingsFor = (pitchClasses: readonly number[]) => pitchClasses
