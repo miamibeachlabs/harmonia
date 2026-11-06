@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'preact/hooks';
-import { chordName, chordPitchClasses, degreeIn, harmonicFieldFor, keyCollectionNamed, keyCollections, thirdLinksIn, triadIn, type Degree, type DiatonicTriad, type HarmonicField, type KeyMode, type MinorForm } from '../domain/harmonicField.ts';
+import { chordName, chordPitchClasses, degreeIn, harmonicFieldFor, keyCollectionNamed, keyCollections, thirdLinksIn, triadIn, type Degree, type DiatonicTriad, type HarmonicField } from '../domain/harmonicField.ts';
 import { majorProgressions, progressionNamed } from '../domain/progressions.ts';
 import { sourceCircleLayout } from '../projections/circleOfThirds.ts';
 import { ChordGlyph } from './ChordGlyph.tsx';
@@ -20,14 +20,11 @@ const nodeName = (note: string, quality: DiatonicTriad['quality']) => quality ==
 
 export const App = () => {
   const [collectionId, setCollectionId] = useState('C');
-  const [mode, setMode] = useState<KeyMode>('major');
-  const [minorForm, setMinorForm] = useState<MinorForm>('natural');
   const [notation, setNotation] = useState<Notation>('notes');
   const [selectedChordIds, setSelectedChordIds] = useState<readonly string[]>([]);
   const [progressionId, setProgressionId] = useState<string | null>(null);
   const collection = keyCollectionNamed(collectionId);
-  const choice = mode === 'major' ? collection.major : collection.relativeMinor;
-  const field = harmonicFieldFor(choice, minorForm);
+  const field = harmonicFieldFor(collection.major, 'natural');
   const thirdLinks = thirdLinksIn(field);
   const progression = progressionId ? progressionNamed(progressionId) : null;
   const triadByIdentity = new Map(field.triads.map(triad => [chordIdentity(field, triad), triad]));
@@ -51,15 +48,6 @@ export const App = () => {
     setSelectedChordIds([]);
   };
 
-  const selectMode = (nextMode: KeyMode) => {
-    setMode(nextMode);
-    if (nextMode === 'minor') setProgressionId(null);
-  };
-
-  const selectMinorForm = (nextForm: MinorForm) => {
-    setMinorForm(nextForm);
-  };
-
   const toggleChord = (triad: DiatonicTriad) => {
     setProgressionId(null);
     const identity = chordIdentity(field, triad);
@@ -81,30 +69,17 @@ export const App = () => {
           <h1>Circle of thirds<span>.</span></h1>
         </div>
         <div class="view-controls">
-          <label>Shared collection
+          <label>Key
             <select value={collectionId} onChange={event => selectCollection(event.currentTarget.value)}>
-              {keyCollections.map(option => <option value={option.id}>{option.major.tonic} major ↔ {option.relativeMinor.tonic} minor</option>)}
+              {keyCollections.map(option => <option value={option.id}>{option.major.tonic} major</option>)}
             </select>
           </label>
-          <div class="mode-switch" aria-label="Tonal centre">
-            <span>Read as</span>
-            <div>
-              <button class={mode === 'major' ? 'is-active' : ''} aria-pressed={mode === 'major'} onClick={() => selectMode('major')}>Major</button>
-              <button class={mode === 'minor' ? 'is-active' : ''} aria-pressed={mode === 'minor'} onClick={() => selectMode('minor')}>Relative minor</button>
-            </div>
-          </div>
-          {mode === 'minor' && <label>Minor form
-            <select value={minorForm} onChange={event => selectMinorForm(event.currentTarget.value as MinorForm)}>
-              <option value="natural">Natural minor</option>
-              <option value="harmonic">Harmonic minor · raised 7th</option>
-            </select>
-          </label>}
-          {mode === 'major' && <label>Progression
+          <label>Progression
             <select value={progressionId ?? ''} onChange={event => selectProgression(event.currentTarget.value)}>
               <option value="">Free selection</option>
               {majorProgressions.map(option => <option value={option.id}>{option.name}</option>)}
             </select>
-          </label>}
+          </label>
           <label>View
             <select value={notation} onChange={event => setNotation(event.currentTarget.value as Notation)}>
               <option value="notes">Note names</option>

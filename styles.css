@@ -47,12 +47,6 @@ h2 { margin: 0; font-size: 1.2rem; font-weight: 650; letter-spacing: -.02em; }
 .view-controls { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; }
 .view-controls label { display: grid; gap: 3px; color: var(--muted); font-size: .7rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
 .view-controls select { min-height: 34px; padding: 4px 8px; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 5px; font-size: .875rem; font-weight: 650; letter-spacing: 0; text-transform: none; }
-.mode-switch { display: grid; gap: 3px; color: var(--muted); font-size: .7rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
-.mode-switch > div { display: flex; min-height: 34px; border: 1px solid var(--line); border-radius: 5px; overflow: hidden; }
-.mode-switch button { min-height: 0; padding: 5px 9px; border: 0; border-radius: 0; color: var(--muted); font-size: .8rem; font-weight: 650; letter-spacing: 0; text-transform: none; }
-.mode-switch button + button { border-left: 1px solid var(--line); }
-.mode-switch button:hover { background: color-mix(in srgb, var(--seafoam) 35%, var(--surface)); }
-.mode-switch button.is-active { color: var(--ink); background: var(--seafoam); }
 .study { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(250px, .85fr); gap: 20px; align-items: start; }
 .diagram { min-width: 0; }
 .section-heading { display: flex; align-items: start; }
