@@ -110,7 +110,7 @@ export const App = () => {
 
           <div class="circle-stage">
             <svg class="circle" viewBox="0 0 100 100" aria-hidden="true">
-              {progression && <defs>
+              {activeDegrees.length > 1 && <defs>
                 <marker id="progression-arrow" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="4" markerHeight="4" orient="auto">
                   <path d="M 0 0 L 8 4 L 0 8 z" />
                 </marker>
@@ -124,8 +124,8 @@ export const App = () => {
                   y2={sourceCircleLayout[degreeIn(field, link.to).geometry].y}
                 />
               ))}
-              {progression?.degrees.slice(1).map((to, index) => {
-                const from = progression.degrees[index];
+              {activeDegrees.slice(1).map((to, index) => {
+                const from = activeDegrees[index];
                 const start = sourceCircleLayout[degreeIn(field, from).geometry];
                 const end = sourceCircleLayout[degreeIn(field, to).geometry];
                 return <line class="progression-link" x1={start.x} y1={start.y} x2={end.x} y2={end.y} marker-end="url(#progression-arrow)" />;
