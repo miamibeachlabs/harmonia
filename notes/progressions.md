@@ -15,9 +15,9 @@ the selected major key:
 - vi–IV–I–V
 - I–vi–ii–V
 
-The circle marks each step with its ordinal number and draws directed links
-between successive roots. The keyboard and chord list preserve that exact
-sequence, including repeated arrivals.
+The circle marks every ordered chord view with its ordinal number. Progression
+presets additionally draw directed links between successive roots. The keyboard
+and chord list preserve that exact sequence, including repeated arrivals.
 
 This lens intentionally makes no static claim about functional harmony. Future
 work may compare progressions by exact properties such as rotation, shared

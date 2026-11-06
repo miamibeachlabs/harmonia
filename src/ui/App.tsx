@@ -31,6 +31,7 @@ export const App = () => {
   });
   const progressionTriads = progression?.degrees.map(degree => triadIn(field, degree)) ?? [];
   const activeTriads = progression ? progressionTriads : selectedTriads;
+  const activeDegrees = progression?.degrees ?? activeTriads.map(triad => triad.root);
 
   useEffect(() => {
     const available = new Set(field.triads.map(triad => chordIdentity(field, triad)));
@@ -90,7 +91,7 @@ export const App = () => {
           {activeTriads.map((triad, index) => {
             const root = degreeIn(field, triad.root);
             return <li class={`${rootHueClass(root.note)} keyboard-chord-list--${triad.quality}`}>
-              {progression && <em>{index + 1}</em>}
+              <em>{index + 1}</em>
               <strong>{chordName(field, triad.root)}</strong>
               <span>{chordNotes(field, triad)}</span>
             </li>;
@@ -138,7 +139,7 @@ export const App = () => {
               const { x, y } = sourceCircleLayout[node.geometry];
               const triad = triadIn(field, node.degree);
               const selected = activeTriads.some(active => active.root === triad.root);
-              const steps = progression?.degrees.flatMap((degree, index) => degree === node.degree ? [index + 1] : []) ?? [];
+              const steps = activeDegrees.flatMap((degree, index) => degree === node.degree ? [index + 1] : []);
               return (
                 <div class="degree-slot" style={{ left: `${x}%`, top: `${y}%` }}>
                   <button
@@ -171,7 +172,7 @@ export const App = () => {
                 const root = degreeIn(field, triad.root);
                 const name = chordName(field, triad.root);
                 return <li>
-                  {progression && <span class="progression-index">{index + 1}</span>}
+                  <span class="progression-index">{index + 1}</span>
                   <ChordGlyph rootHue={rootHueClass(root.note)} pitchClasses={chordPitchClasses(field, triad)} label={`${name} on one octave of piano keys`} />
                   <div>
                     <strong>{name}</strong>
