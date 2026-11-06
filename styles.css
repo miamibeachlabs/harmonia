@@ -47,12 +47,6 @@ h2 { margin: 0; font-size: 1.2rem; font-weight: 650; letter-spacing: -.02em; }
 .view-controls { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; }
 .view-controls label { display: grid; gap: 3px; color: var(--muted); font-size: .7rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
 .view-controls select { min-height: 34px; padding: 4px 8px; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 5px; font-size: .875rem; font-weight: 650; letter-spacing: 0; text-transform: none; }
-.mode-switch { display: grid; gap: 3px; color: var(--muted); font-size: .7rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
-.mode-switch > div { display: flex; min-height: 34px; border: 1px solid var(--line); border-radius: 5px; overflow: hidden; }
-.mode-switch button { min-height: 0; padding: 5px 9px; border: 0; border-radius: 0; color: var(--muted); font-size: .8rem; font-weight: 650; letter-spacing: 0; text-transform: none; }
-.mode-switch button + button { border-left: 1px solid var(--line); }
-.mode-switch button:hover { background: color-mix(in srgb, var(--seafoam) 35%, var(--surface)); }
-.mode-switch button.is-active { color: var(--ink); background: var(--seafoam); }
 .study { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(250px, .85fr); gap: 20px; align-items: start; }
 .diagram { min-width: 0; }
 .section-heading { display: flex; align-items: start; }
@@ -61,8 +55,9 @@ h2 { margin: 0; font-size: 1.2rem; font-weight: 650; letter-spacing: -.02em; }
 .third-link { fill: none; stroke-linecap: round; pointer-events: none; }
 .third-link--major-third { stroke: var(--ink); stroke-opacity: .55; stroke-width: 1.35; }
 .third-link--minor-third { stroke: var(--muted); stroke-opacity: .48; stroke-width: .8; }
-.selection { fill: none; pointer-events: none; stroke-linecap: round; stroke-linejoin: round; stroke-width: 14; }
-.selection { stroke-opacity: .38; }
+.selection { fill: var(--root-color); stroke: var(--root-color); stroke-linejoin: round; stroke-width: 14; opacity: .32; pointer-events: none; }
+.progression-link { fill: none; stroke: var(--turquoise); stroke-width: 1.65; stroke-dasharray: 2.5 1.5; stroke-opacity: .92; }
+#progression-arrow path { fill: var(--turquoise); }
 .degree-slot { position: absolute; z-index: 1; width: 50px; height: 50px; transform: translate(-50%, -50%); }
 .degree-node { position: relative; display: grid; place-items: center; width: 100%; height: 100%; min-height: 0; padding: 0; border: 2px solid var(--ink); color: var(--ink); transition: transform .15s ease, box-shadow .15s ease; }
 .degree-node:hover { transform: scale(1.08); filter: brightness(.96); }
@@ -72,8 +67,8 @@ h2 { margin: 0; font-size: 1.2rem; font-weight: 650; letter-spacing: -.02em; }
 .degree-node--diminished { border-radius: 0; clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
 .degree-node--augmented { border-radius: 0; clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%); }
 .degree-node .note { font-size: 1.55rem; font-weight: 800; letter-spacing: -.07em; line-height: .9; }
-.degree-node.is-abstract .note { font-family: Georgia, serif; font-size: 1.05rem; letter-spacing: -.04em; }
 .degree-slot .numeral { position: absolute; top: calc(100% + 5px); left: 50%; color: var(--ink); font-family: Georgia, serif; font-size: 1rem; font-weight: 700; line-height: 1; transform: translateX(-50%); white-space: nowrap; }
+.progression-step { position: absolute; top: -8px; right: -10px; display: grid; place-items: center; min-width: 19px; min-height: 19px; padding: 1px 3px; color: var(--surface); background: var(--ink); border: 1px solid var(--surface); border-radius: 99px; font-size: .7rem; font-weight: 800; line-height: 1; }
 .legend { display: flex; flex-wrap: wrap; gap: 8px 18px; justify-content: center; margin-top: 8px; color: var(--muted); font-size: .8rem; }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
 .legend-line { width: 20px; border-top: 1px solid var(--line); }
@@ -84,6 +79,7 @@ h2 { margin: 0; font-size: 1.2rem; font-weight: 650; letter-spacing: -.02em; }
 .chord-list { display: grid; gap: 10px; padding: 0; margin: 18px 0; list-style: none; }
 .chord-list li { display: flex; align-items: center; gap: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
 .chord-list li > div { display: grid; gap: 2px; }
+.progression-index { display: grid; place-items: center; flex: 0 0 auto; width: 22px; height: 22px; color: var(--surface); background: var(--ink); border-radius: 50%; font-size: .75rem; font-weight: 800; }
 .chord-glyph { flex: 0 0 auto; width: 82px; height: auto; }
 .chord-glyph__white { fill: var(--surface); stroke: var(--ink); stroke-width: .1; }
 .chord-glyph__black { fill: var(--ink); stroke: var(--ink); stroke-width: .1; }
@@ -99,6 +95,7 @@ h2 { margin: 0; font-size: 1.2rem; font-weight: 650; letter-spacing: -.02em; }
 .piano .piano-dot--on-black { stroke: var(--surface); }
 .keyboard-chord-list { display: flex; flex-wrap: wrap; gap: 8px 18px; padding: 0; margin: 0; list-style: none; }
 .keyboard-chord-list li { display: inline-flex; align-items: baseline; gap: 5px; }
+.keyboard-chord-list em { display: inline-grid; place-items: center; width: 16px; height: 16px; color: var(--surface); background: var(--ink); border-radius: 50%; font-size: .65rem; font-style: normal; font-weight: 800; }
 .keyboard-chord-list li::before { width: 10px; height: 10px; content: ''; border: 1px solid var(--ink); border-radius: 50%; }
 .keyboard-chord-list strong { font-size: .9rem; }
 .keyboard-chord-list span { color: var(--muted); font-size: .85rem; }
@@ -115,7 +112,6 @@ h2 { margin: 0; font-size: 1.2rem; font-weight: 650; letter-spacing: -.02em; }
 .root-hue-10 { --root-color: var(--root-hue-10); }
 .root-hue-11 { --root-color: var(--root-hue-11); }
 .degree-node.root-hue-0, .degree-node.root-hue-1, .degree-node.root-hue-2, .degree-node.root-hue-3, .degree-node.root-hue-4, .degree-node.root-hue-5, .degree-node.root-hue-6, .degree-node.root-hue-7, .degree-node.root-hue-8, .degree-node.root-hue-9, .degree-node.root-hue-10, .degree-node.root-hue-11 { color: var(--ink); background: var(--root-color); }
-.selection { stroke: var(--root-color); }
 .keyboard-chord-list li::before { background: var(--root-color); }
 .keyboard-chord-list--major::before { border-radius: 1px; }
 .keyboard-chord-list--minor::before { border-radius: 50%; }
