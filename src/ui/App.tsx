@@ -214,7 +214,13 @@ export const App = () => {
         </aside>
       </main>
 
-      <section class="keyboard-lens surface" aria-label="Keyboard">
+      <section class="keyboard-lens surface" aria-labelledby="keyboard-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">PIANO KEYBOARD</p>
+            <h2 id="keyboard-title">Every octave.</h2>
+          </div>
+        </div>
         <PianoKeyboard chords={activeTriads.map(triad => ({
           rootHue: rootHueClass(degreeIn(field, triad.root).note),
           quality: triad.quality,

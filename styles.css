@@ -99,7 +99,7 @@ h2 { margin: 0; font-size: 1.2rem; font-weight: 650; letter-spacing: -.02em; }
 .chord-actions button:disabled:hover { background: transparent; }
 .clear { width: 100%; margin-top: 4px; }
 .play-sequence { width: 100%; margin-top: 14px; }
-.keyboard-lens { padding: 14px 20px; }
+.keyboard-lens .piano { margin-top: 20px; }
 .piano { display: block; width: 100%; height: auto; overflow: visible; }
 .piano-key--white rect { fill: var(--surface); stroke: var(--ink); stroke-width: .08; }
 .piano-key--black rect { fill: var(--ink); }
