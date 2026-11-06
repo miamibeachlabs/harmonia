@@ -5,6 +5,7 @@ import { majorProgressions, progressionNamed } from '../domain/progressions.ts';
 import { registerFor, voiceLead } from '../domain/voiceLeading.ts';
 import { sourceCircleLayout } from '../projections/circleOfThirds.ts';
 import { ChordGlyph } from './ChordGlyph.tsx';
+import { MiamiBeachLabsBrand } from './MiamiBeachLabsBrand.tsx';
 import { PianoKeyboard } from './PianoKeyboard.tsx';
 import { rootHueClass } from './rootHue.ts';
 
@@ -99,8 +100,8 @@ export const App = () => {
     <div class="workspace">
       <header class="masthead">
         <div>
-          <p class="eyebrow">A MIAMI BEACH LABS APP</p>
           <h1>Harmonia<span>.</span></h1>
+          <MiamiBeachLabsBrand />
         </div>
         <div class="view-controls">
           <label>Key

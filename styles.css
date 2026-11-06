@@ -41,6 +41,9 @@ button.primary:hover { background: var(--ocean); }
 .eyebrow { margin: 0 0 10px; color: var(--muted); font-size: .75rem; font-weight: 700; letter-spacing: .12em; }
 h1 { margin: 0; font-size: clamp(2rem, 6vw, 3rem); font-weight: 750; line-height: 1.1; letter-spacing: -.055em; }
 h1 span { color: var(--coral); }
+.brand-credit { display: flex; align-items: center; gap: 6px; margin-top: 8px; color: var(--muted); font-size: .68rem; }
+.brand-credit svg { width: 22px; height: 22px; }
+.brand-credit strong { color: var(--ink); font-size: .72rem; }
 .surface { padding: 24px 20px; margin-top: 28px; background: var(--surface); border-top: 2px solid var(--ink); border-bottom: 1px solid var(--line); }
 h2 { margin: 0; font-size: 1.2rem; font-weight: 650; letter-spacing: -.02em; }
 .surface p { color: var(--muted); line-height: 1.6; }
