@@ -165,11 +165,7 @@ export const App = () => {
               })}
               {activeTriads.map(triad => {
                 const hue = rootHueClass(degreeIn(field, triad.root).note);
-                const path = chordPath(field, triad);
-                return <g>
-                  <polygon class={`selection-area ${hue}`} points={path} />
-                  <polyline class={`selection-ribbon ${hue}`} points={path} />
-                </g>;
+                return <polygon class={`selection ${hue}`} points={chordPath(field, triad)} />;
               })}
             </svg>
             {field.degrees.map(node => {
