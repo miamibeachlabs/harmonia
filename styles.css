@@ -39,8 +39,11 @@ button.primary:hover { background: var(--ocean); }
 .workspace { max-width: 960px; margin: 0 auto; padding: 56px 24px 24px; }
 .masthead { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
 .eyebrow { margin: 0 0 10px; color: var(--muted); font-size: .75rem; font-weight: 700; letter-spacing: .12em; }
-h1 { margin: 0; font-size: clamp(2rem, 6vw, 3rem); font-weight: 750; line-height: 1.1; letter-spacing: -.055em; }
-h1 span { color: var(--coral); }
+h1 { display: flex; align-items: center; gap: .22em; margin: 0; font-size: clamp(2rem, 6vw, 3rem); font-weight: 750; line-height: 1.1; letter-spacing: -.055em; }
+h1::before, h1::after { color: var(--coral); content: '♪'; font-size: .55em; letter-spacing: 0; }
+.brand-credit { display: flex; align-items: center; gap: 6px; margin-top: 8px; color: var(--muted); font-size: .68rem; }
+.brand-credit svg { width: 22px; height: 22px; }
+.brand-credit strong { color: var(--ink); font-size: .72rem; }
 .surface { padding: 24px 20px; margin-top: 28px; background: var(--surface); border-top: 2px solid var(--ink); border-bottom: 1px solid var(--line); }
 h2 { margin: 0; font-size: 1.2rem; font-weight: 650; letter-spacing: -.02em; }
 .surface p { color: var(--muted); line-height: 1.6; }
@@ -96,7 +99,7 @@ h2 { margin: 0; font-size: 1.2rem; font-weight: 650; letter-spacing: -.02em; }
 .chord-actions button:disabled:hover { background: transparent; }
 .clear { width: 100%; margin-top: 4px; }
 .play-sequence { width: 100%; margin-top: 14px; }
-.keyboard-lens { padding: 14px 20px; }
+.keyboard-lens .piano { margin-top: 20px; }
 .piano { display: block; width: 100%; height: auto; overflow: visible; }
 .piano-key--white rect { fill: var(--surface); stroke: var(--ink); stroke-width: .08; }
 .piano-key--black rect { fill: var(--ink); }

@@ -5,6 +5,7 @@ import { majorProgressions, progressionNamed } from '../domain/progressions.ts';
 import { registerFor, voiceLead } from '../domain/voiceLeading.ts';
 import { sourceCircleLayout } from '../projections/circleOfThirds.ts';
 import { ChordGlyph } from './ChordGlyph.tsx';
+import { MiamiBeachLabsBrand } from './MiamiBeachLabsBrand.tsx';
 import { PianoKeyboard } from './PianoKeyboard.tsx';
 import { rootHueClass } from './rootHue.ts';
 
@@ -99,8 +100,8 @@ export const App = () => {
     <div class="workspace">
       <header class="masthead">
         <div>
-          <p class="eyebrow">A MIAMI BEACH LABS APP</p>
-          <h1>Harmonia<span>.</span></h1>
+          <h1>Harmonia</h1>
+          <MiamiBeachLabsBrand />
         </div>
         <div class="view-controls">
           <label>Key
@@ -122,7 +123,7 @@ export const App = () => {
           <div class="section-heading">
             <div>
               <p class="eyebrow">SOURCE GEOMETRY</p>
-              <h2 id="diagram-title">Circle of thirds.</h2>
+              <h2 id="diagram-title">Circle of thirds</h2>
             </div>
           </div>
 
@@ -213,7 +214,13 @@ export const App = () => {
         </aside>
       </main>
 
-      <section class="keyboard-lens surface" aria-label="Keyboard">
+      <section class="keyboard-lens surface" aria-labelledby="keyboard-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">PIANO KEYBOARD</p>
+            <h2 id="keyboard-title">Every octave</h2>
+          </div>
+        </div>
         <PianoKeyboard chords={activeTriads.map(triad => ({
           rootHue: rootHueClass(degreeIn(field, triad.root).note),
           quality: triad.quality,
