@@ -37,7 +37,7 @@ export const App = () => {
   const [chordPlayer] = useState(createChordPlayer);
   const [collectionId, setCollectionId] = useState('C');
   const [selectedChordIds, setSelectedChordIds] = useState<readonly string[]>([]);
-  const [progressionId, setProgressionId] = useState<string | null>('pop-axis');
+  const [progressionId, setProgressionId] = useState<string | null>('doo-wop');
   const collection = keyCollectionNamed(collectionId);
   const field = harmonicFieldFor(collection.major, 'natural');
   const thirdLinks = thirdLinksIn(field);
@@ -99,8 +99,8 @@ export const App = () => {
     <div class="workspace">
       <header class="masthead">
         <div>
-          <p class="eyebrow">HARMONIA · FIRST STUDY</p>
-          <h1>Circle of thirds<span>.</span></h1>
+          <p class="eyebrow">FIRST STUDY</p>
+          <h1>Harmonia<span>.</span></h1>
         </div>
         <div class="view-controls">
           <label>Key
@@ -117,30 +117,12 @@ export const App = () => {
         </div>
       </header>
 
-      <section class="keyboard-lens surface" aria-label="Keyboard">
-        <PianoKeyboard chords={activeTriads.map(triad => ({
-          rootHue: rootHueClass(degreeIn(field, triad.root).note),
-          quality: triad.quality,
-          pitchClasses: chordPitchClasses(field, triad),
-        }))} />
-        {activeTriads.length > 0 && <ul class="keyboard-chord-list">
-          {activeTriads.map((triad, index) => {
-            const root = degreeIn(field, triad.root);
-            return <li class={`${rootHueClass(root.note)} keyboard-chord-list--${triad.quality}`}>
-              <em>{index + 1}</em>
-              <strong>{chordName(field, triad.root)}</strong>
-              <span>{chordNotes(field, triad)}</span>
-            </li>;
-          })}
-        </ul>}
-      </section>
-
       <main class="study">
         <section class="diagram surface" aria-labelledby="diagram-title">
           <div class="section-heading">
             <div>
               <p class="eyebrow">SOURCE GEOMETRY</p>
-              <h2 id="diagram-title">{progression ? 'Follow this chord path.' : 'Select a root to reveal its chord.'}</h2>
+              <h2 id="diagram-title">Circle of thirds.</h2>
             </div>
           </div>
 
@@ -230,6 +212,24 @@ export const App = () => {
 
         </aside>
       </main>
+
+      <section class="keyboard-lens surface" aria-label="Keyboard">
+        <PianoKeyboard chords={activeTriads.map(triad => ({
+          rootHue: rootHueClass(degreeIn(field, triad.root).note),
+          quality: triad.quality,
+          pitchClasses: chordPitchClasses(field, triad),
+        }))} />
+        {activeTriads.length > 0 && <ul class="keyboard-chord-list">
+          {activeTriads.map((triad, index) => {
+            const root = degreeIn(field, triad.root);
+            return <li class={`${rootHueClass(root.note)} keyboard-chord-list--${triad.quality}`}>
+              <em>{index + 1}</em>
+              <strong>{chordName(field, triad.root)}</strong>
+              <span>{chordNotes(field, triad)}</span>
+            </li>;
+          })}
+        </ul>}
+      </section>
     </div>
   );
 };
