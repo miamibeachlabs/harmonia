@@ -1,38 +1,32 @@
+import type { VoicingRegister } from '../domain/voiceLeading.ts';
+
 type ChordGlyphProps = Readonly<{
   rootHue: string;
-  pitchClasses: readonly number[];
+  midiNotes: readonly number[];
+  register: VoicingRegister;
   label: string;
 }>;
 
-const blackKeyX: Readonly<Record<number, number>> = {
-  1: .66,
-  3: 1.66,
-  6: 3.66,
-  8: 4.66,
-  10: 5.66,
-};
+const whitePitchClasses = new Set([0, 2, 4, 5, 7, 9, 11]);
+const pitchClassOf = (midi: number) => (midi % 12 + 12) % 12;
 
-const whiteKeyX: Readonly<Record<number, number>> = {
-  0: 0,
-  2: 1,
-  4: 2,
-  5: 3,
-  7: 4,
-  9: 5,
-  11: 6,
-};
-
-/** A one-octave chord voicing: a compact companion to the full keyboard lens. */
-export const ChordGlyph = ({ rootHue, pitchClasses, label }: ChordGlyphProps) => {
-  const selected = (pitchClass: number) => pitchClasses.includes(pitchClass);
+/** A compact keyboard window showing the exact notes being played. */
+export const ChordGlyph = ({ rootHue, midiNotes, register, label }: ChordGlyphProps) => {
+  const midiEnd = register.midiStart + register.octaves * 12;
+  const keyboardNotes = Array.from({ length: midiEnd - register.midiStart + 1 }, (_, index) => register.midiStart + index);
+  const whiteKeys = keyboardNotes.filter(midi => whitePitchClasses.has(pitchClassOf(midi)));
+  const blackKeys = keyboardNotes.filter(midi => !whitePitchClasses.has(pitchClassOf(midi)));
+  const whiteKeyPosition = (midi: number) => whiteKeys.indexOf(midi);
+  const blackKeyPosition = (midi: number) => whiteKeys.filter(white => white < midi).length - .34;
+  const width = register.octaves * 7;
 
   return (
-    <svg class={`chord-glyph ${rootHue}`} viewBox="0 0 7 3.2" role="img" aria-label={label}>
-      {Object.entries(whiteKeyX).map(([pitchClass, x]) => (
-        <rect class={`chord-glyph__white ${selected(Number(pitchClass)) ? 'is-selected' : ''}`} x={x} y="0" width="1" height="3.2" />
+    <svg class={`chord-glyph ${rootHue}`} viewBox={`0 0 ${width} 3.2`} role="img" aria-label={label}>
+      {whiteKeys.map(midi => (
+        <rect class={`chord-glyph__white ${midiNotes.includes(midi) ? 'is-selected' : ''}`} x={whiteKeyPosition(midi)} y="0" width="1" height="3.2" />
       ))}
-      {Object.entries(blackKeyX).map(([pitchClass, x]) => (
-        <rect class={`chord-glyph__black ${selected(Number(pitchClass)) ? 'is-selected' : ''}`} x={x} y="0" width=".68" height="2" rx=".05" />
+      {blackKeys.map(midi => (
+        <rect class={`chord-glyph__black ${midiNotes.includes(midi) ? 'is-selected' : ''}`} x={blackKeyPosition(midi)} y="0" width=".68" height="2" rx=".05" />
       ))}
     </svg>
   );

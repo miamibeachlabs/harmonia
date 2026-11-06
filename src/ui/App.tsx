@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'preact/hooks';
-import { chordName, chordPitchClasses, degreeIn, harmonicFieldFor, keyCollectionNamed, keyCollections, thirdLinksIn, triadIn, type Degree, type DiatonicTriad, type HarmonicField } from '../domain/harmonicField.ts';
+import { createChordPlayer } from '../audio/chordPlayer.ts';
+import { chordName, chordPitchClasses, degreeIn, harmonicFieldFor, keyCollectionNamed, keyCollections, pitchClassOf, thirdLinksIn, triadIn, type Degree, type DiatonicTriad, type HarmonicField } from '../domain/harmonicField.ts';
 import { majorProgressions, progressionNamed } from '../domain/progressions.ts';
+import { registerFor, voiceLead } from '../domain/voiceLeading.ts';
 import { sourceCircleLayout } from '../projections/circleOfThirds.ts';
 import { ChordGlyph } from './ChordGlyph.tsx';
 import { PianoKeyboard } from './PianoKeyboard.tsx';
@@ -32,6 +34,7 @@ const arrowSegment = (field: HarmonicField, from: Degree, to: Degree) => {
 };
 
 export const App = () => {
+  const [chordPlayer] = useState(createChordPlayer);
   const [collectionId, setCollectionId] = useState('C');
   const [selectedChordIds, setSelectedChordIds] = useState<readonly string[]>([]);
   const [progressionId, setProgressionId] = useState<string | null>(null);
@@ -47,6 +50,14 @@ export const App = () => {
   const progressionTriads = progression?.degrees.map(degree => triadIn(field, degree)) ?? [];
   const activeTriads = progression ? progressionTriads : selectedTriads;
   const activeDegrees = progression?.degrees ?? activeTriads.map(triad => triad.root);
+  const soundingChords = activeTriads.map(triad => ({
+    rootPitchClass: pitchClassOf(degreeIn(field, triad.root).note),
+    pitchClasses: chordPitchClasses(field, triad),
+  }));
+  const voicedChords = voiceLead(soundingChords);
+  const glyphRegister = registerFor(voicedChords);
+
+  useEffect(() => () => chordPlayer.stop(), [chordPlayer]);
 
   useEffect(() => {
     const available = new Set(field.triads.map(triad => chordIdentity(field, triad)));
@@ -61,13 +72,23 @@ export const App = () => {
     setSelectedChordIds([]);
   };
 
-  const toggleChord = (triad: DiatonicTriad) => {
+  const addChord = (triad: DiatonicTriad) => {
     setProgressionId(null);
     const identity = chordIdentity(field, triad);
-    setSelectedChordIds(selected => selected.includes(identity)
-      ? selected.filter(item => item !== identity)
-      : [...selected, identity]);
+    setSelectedChordIds(selected => [...selected, identity]);
   };
+
+  const removeChord = (index: number) =>
+    setSelectedChordIds(selected => selected.filter((_, selectedIndex) => selectedIndex !== index));
+
+  const moveChord = (from: number, to: number) =>
+    setSelectedChordIds(selected => {
+      if (to < 0 || to >= selected.length) return selected;
+      const reordered = [...selected];
+      const [chord] = reordered.splice(from, 1);
+      reordered.splice(to, 0, chord);
+      return reordered;
+    });
 
   const selectProgression = (id: string) => {
     setProgressionId(id || null);
@@ -158,9 +179,8 @@ export const App = () => {
                 <div class="degree-slot" style={{ left: `${x}%`, top: `${y}%` }}>
                   <button
                     class={`degree-node degree-node--${node.quality} ${rootHueClass(node.note)} ${selected ? 'is-selected' : ''}`}
-                    aria-pressed={selected}
-                    aria-label={`${selected ? 'Hide' : 'Show'} ${node.note} ${node.quality} chord, ${node.degree}`}
-                    onClick={() => toggleChord(triad)}
+                    aria-label={`Add ${node.note} ${node.quality} chord, ${node.degree}`}
+                    onClick={() => addChord(triad)}
                   >
                     <span class="note">{nodeName(node.note, node.quality)}</span>
                   </button>
@@ -181,20 +201,30 @@ export const App = () => {
           <p class="eyebrow">{progression ? 'PROGRESSION' : 'CHORDS IN VIEW'}</p>
           <h2 id="reading-title">{progression?.name ?? (activeTriads.length ? 'Selected chords' : 'Nothing selected yet')}</h2>
           {activeTriads.length ? (
-            <ul class="chord-list">
-              {activeTriads.map((triad, index) => {
-                const root = degreeIn(field, triad.root);
-                const name = chordName(field, triad.root);
-                return <li>
-                  <span class="progression-index">{index + 1}</span>
-                  <ChordGlyph rootHue={rootHueClass(root.note)} pitchClasses={chordPitchClasses(field, triad)} label={`${name} on one octave of piano keys`} />
-                  <div>
-                    <strong>{name}</strong>
-                    <span>{triad.root} · {chordNotes(field, triad)}</span>
-                  </div>
-                </li>;
-              })}
-            </ul>
+            <>
+              <ul class="chord-list">
+                {activeTriads.map((triad, index) => {
+                  const root = degreeIn(field, triad.root);
+                  const name = chordName(field, triad.root);
+                  return <li>
+                    <span class="progression-index">{index + 1}</span>
+                    <ChordGlyph rootHue={rootHueClass(root.note)} midiNotes={voicedChords[index] ?? []} register={glyphRegister} label={`${name} in its played voicing`} />
+                    <div class="chord-summary">
+                      <strong class="chord-degree">{triad.root}</strong>
+                      <span class="chord-relation">=</span>
+                      <strong class="chord-name">{name}</strong>
+                      <span class="chord-notes">({chordNotes(field, triad)})</span>
+                    </div>
+                    {!progression && <span class="chord-actions" aria-label={`Edit ${name} at step ${index + 1}`}>
+                      <button class="chord-action--remove" aria-label={`Remove ${name}`} onClick={() => removeChord(index)}>×</button>
+                      <button class="chord-action--move" disabled={index === 0} aria-label={`Move ${name} earlier`} onClick={() => moveChord(index, index - 1)}>↑</button>
+                      <button class="chord-action--move" disabled={index === activeTriads.length - 1} aria-label={`Move ${name} later`} onClick={() => moveChord(index, index + 1)}>↓</button>
+                    </span>}
+                  </li>;
+                })}
+              </ul>
+              <button class="primary play-sequence" onClick={() => void chordPlayer.playSequence(soundingChords)}>Play sequence</button>
+            </>
           ) : <p>Tap {field.tonic} to shade its tonic chord. Select more roots to compare overlapping chords.</p>}
           {!progression && activeTriads.length > 0 && <button class="clear" onClick={() => setSelectedChordIds([])}>Clear selection</button>}
 

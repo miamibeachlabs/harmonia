@@ -77,16 +77,25 @@ h2 { margin: 0; font-size: 1.2rem; font-weight: 650; letter-spacing: -.02em; }
 .reading { margin-top: 28px; }
 .reading p:last-child { margin-bottom: 0; }
 .chord-list { display: grid; gap: 10px; padding: 0; margin: 18px 0; list-style: none; }
-.chord-list li { display: flex; align-items: center; gap: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
-.chord-list li > div { display: grid; gap: 2px; }
-.progression-index { display: grid; place-items: center; flex: 0 0 auto; width: 22px; height: 22px; color: var(--surface); background: var(--ink); border-radius: 50%; font-size: .75rem; font-weight: 800; }
-.chord-glyph { flex: 0 0 auto; width: 82px; height: auto; }
+.chord-list li { display: grid; grid-template: "index glyph . actions" auto "summary summary summary summary" auto / 22px 92px minmax(0, 1fr) auto; column-gap: 10px; align-items: start; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+.progression-index { grid-area: index; display: grid; place-items: center; width: 22px; height: 22px; color: var(--surface); background: var(--ink); border-radius: 50%; font-size: .75rem; font-weight: 800; }
+.chord-glyph { grid-area: glyph; width: 92px; height: auto; }
 .chord-glyph__white { fill: var(--surface); stroke: var(--ink); stroke-width: .1; }
 .chord-glyph__black { fill: var(--ink); stroke: var(--ink); stroke-width: .1; }
 .chord-glyph rect.is-selected { fill: var(--root-color); }
-.chord-list strong { color: var(--ink); }
-.chord-list span { color: var(--muted); font-size: .9rem; }
+.chord-summary { grid-area: summary; display: flex; align-items: baseline; gap: 8px; padding-top: 4px; }
+.chord-degree { color: var(--ink); font-family: Georgia, serif; font-size: 1.05rem; }
+.chord-relation { color: var(--muted); font-family: Georgia, serif; }
+.chord-name { color: var(--ink); font-size: .95rem; }
+.chord-notes { color: var(--muted); font-size: .8rem; }
+.chord-actions { grid-area: actions; display: flex; gap: 2px; }
+.chord-actions button { min-width: 22px; min-height: 22px; padding: 1px 4px; border-color: var(--line); border-radius: 4px; font-size: .72rem; font-weight: 800; line-height: 1; }
+.chord-actions .chord-action--remove { min-width: 26px; color: var(--coral); border-color: color-mix(in srgb, var(--coral) 42%, var(--line)); font-size: .9rem; }
+.chord-actions .chord-action--move { color: var(--muted); }
+.chord-actions button:disabled { cursor: default; opacity: .3; }
+.chord-actions button:disabled:hover { background: transparent; }
 .clear { width: 100%; margin-top: 4px; }
+.play-sequence { width: 100%; margin-top: 14px; }
 .keyboard-lens { padding: 14px 20px; }
 .piano { display: block; width: 100%; height: auto; overflow: visible; }
 .piano-key--white rect { fill: var(--surface); stroke: var(--ink); stroke-width: .08; }
