@@ -16,6 +16,21 @@ const chordNotes = (field: HarmonicField, triad: DiatonicTriad) => triad.members
 const chordIdentity = (field: HarmonicField, triad: DiatonicTriad) => chordPitchClasses(field, triad).toSorted((a, b) => a - b).join(':');
 const nodeName = (note: string, quality: DiatonicTriad['quality']) => quality === 'minor' ? `${note}m` : note;
 
+const arrowSegment = (field: HarmonicField, from: Degree, to: Degree) => {
+  const start = sourceCircleLayout[degreeIn(field, from).geometry];
+  const end = sourceCircleLayout[degreeIn(field, to).geometry];
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+  const distance = Math.hypot(dx, dy);
+  const inset = 6;
+  return {
+    x1: start.x + dx / distance * inset,
+    y1: start.y + dy / distance * inset,
+    x2: end.x - dx / distance * inset,
+    y2: end.y - dy / distance * inset,
+  };
+};
+
 export const App = () => {
   const [collectionId, setCollectionId] = useState('C');
   const [selectedChordIds, setSelectedChordIds] = useState<readonly string[]>([]);
@@ -111,8 +126,8 @@ export const App = () => {
           <div class="circle-stage">
             <svg class="circle" viewBox="0 0 100 100" aria-hidden="true">
               {activeDegrees.length > 1 && <defs>
-                <marker id="progression-arrow" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="4" markerHeight="4" orient="auto">
-                  <path d="M 0 0 L 8 4 L 0 8 z" />
+                <marker id="progression-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                  <path d="M 0 0 L 10 5 L 0 10 z" />
                 </marker>
               </defs>}
               {thirdLinks.map(link => (
@@ -126,9 +141,8 @@ export const App = () => {
               ))}
               {activeDegrees.slice(1).map((to, index) => {
                 const from = activeDegrees[index];
-                const start = sourceCircleLayout[degreeIn(field, from).geometry];
-                const end = sourceCircleLayout[degreeIn(field, to).geometry];
-                return <line class="progression-link" x1={start.x} y1={start.y} x2={end.x} y2={end.y} marker-end="url(#progression-arrow)" />;
+                const segment = arrowSegment(field, from, to);
+                return <line class="progression-link" {...segment} marker-end="url(#progression-arrow)" />;
               })}
               {activeTriads.map(triad => {
                 const hue = rootHueClass(degreeIn(field, triad.root).note);
