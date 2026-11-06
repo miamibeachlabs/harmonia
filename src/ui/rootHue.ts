@@ -1,22 +1,15 @@
-import { pitchClassOf } from '../domain/harmonicField.ts';
-
 /**
- * A stable Harmonia color order around the Circle of Fifths.
- * This is an interface convention, not a universal music-theory standard.
+ * Hue follows the written root letter, not sounding pitch.
+ * D♯ therefore shares D's hue; E♭ shares E's hue.
  */
-const fifthsPosition: Readonly<Record<number, number>> = {
-  0: 0,
-  7: 1,
-  2: 2,
-  9: 3,
-  4: 4,
-  11: 5,
-  6: 6,
-  1: 7,
-  8: 8,
-  3: 9,
-  10: 10,
-  5: 11,
+const rootLetterHue: Readonly<Record<string, number>> = {
+  C: 0,
+  G: 1,
+  D: 2,
+  A: 3,
+  E: 4,
+  B: 5,
+  F: 11,
 };
 
-export const rootHueClass = (note: string) => `root-hue-${fifthsPosition[pitchClassOf(note)]}`;
+export const rootHueClass = (note: string) => `root-hue-${rootLetterHue[note[0]?.toUpperCase() ?? ''] ?? 0}`;

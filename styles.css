@@ -96,6 +96,7 @@ h2 { margin: 0; font-size: 1.2rem; font-weight: 650; letter-spacing: -.02em; }
 .piano-key--white rect { fill: var(--surface); stroke: var(--ink); stroke-width: .08; }
 .piano-key--black rect { fill: var(--ink); }
 .piano .piano-dot { fill: var(--root-color); stroke: var(--ink); stroke-width: .07; }
+.piano .piano-dot--on-black { stroke: var(--surface); }
 .keyboard-chord-list { display: flex; flex-wrap: wrap; gap: 8px 18px; padding: 0; margin: 0; list-style: none; }
 .keyboard-chord-list li { display: inline-flex; align-items: baseline; gap: 5px; }
 .keyboard-chord-list li::before { width: 10px; height: 10px; content: ''; border: 1px solid var(--ink); border-radius: 50%; }

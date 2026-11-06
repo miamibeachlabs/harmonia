@@ -51,8 +51,8 @@ const dotY = (index: number, count: number, black: boolean) => {
   return top + (bottom - top) * (index + 1) / (count + 1);
 };
 
-const dot = (chord: KeyboardChord, x: number, y: number, radius: number) => {
-  const className = `piano-dot ${chord.rootHue}`;
+const dot = (chord: KeyboardChord, x: number, y: number, radius: number, onBlackKey: boolean) => {
+  const className = `piano-dot ${chord.rootHue} ${onBlackKey ? 'piano-dot--on-black' : ''}`;
 
   if (chord.quality === 'major') {
     return <rect class={className} x={x - radius} y={y - radius} width={radius * 2} height={radius * 2} rx=".03" />;
@@ -80,7 +80,7 @@ export const PianoKeyboard = ({ chords }: PianoKeyboardProps) => {
         <g class="piano-key piano-key--white">
           <rect x={key.x} y="0" width="1" height="5" />
           {chords.map((chord, index) => contains(key, chord) && (
-            dot(chord, key.x + .5, dotY(index, chords.length, false), .23)
+            dot(chord, key.x + .5, dotY(index, chords.length, false), .23, false)
           ))}
         </g>
       ))}
@@ -88,7 +88,7 @@ export const PianoKeyboard = ({ chords }: PianoKeyboardProps) => {
         <g class="piano-key piano-key--black">
           <rect x={key.x} y="0" width=".68" height="3.15" rx=".08" />
           {chords.map((chord, index) => contains(key, chord) && (
-            dot(chord, key.x + .34, dotY(index, chords.length, true), .2)
+            dot(chord, key.x + .34, dotY(index, chords.length, true), .2, true)
           ))}
         </g>
       ))}
