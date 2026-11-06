@@ -37,7 +37,7 @@ export const App = () => {
   const [chordPlayer] = useState(createChordPlayer);
   const [collectionId, setCollectionId] = useState('C');
   const [selectedChordIds, setSelectedChordIds] = useState<readonly string[]>([]);
-  const [progressionId, setProgressionId] = useState<string | null>(null);
+  const [progressionId, setProgressionId] = useState<string | null>('pop-axis');
   const collection = keyCollectionNamed(collectionId);
   const field = harmonicFieldFor(collection.major, 'natural');
   const thirdLinks = thirdLinksIn(field);
