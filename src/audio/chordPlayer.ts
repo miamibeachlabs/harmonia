@@ -1,4 +1,4 @@
-import { voiceLead, type SoundingChord } from '../domain/voiceLeading.ts';
+import { canonicalVoicings, type SoundingChord } from '../domain/voiceLeading.ts';
 
 export type { SoundingChord } from '../domain/voiceLeading.ts';
 
@@ -112,7 +112,7 @@ export const createChordPlayer = () => {
       stop();
 
       const firstChordAt = output.context.currentTime + 0.04;
-      voiceLead(chords).forEach((voicing, chordIndex) => {
+      canonicalVoicings(chords).forEach((voicing, chordIndex) => {
         const bass = bassRegister + chords[chordIndex].rootPitchClass;
         const barStart = firstChordAt + chordIndex * barLength;
         playNote(bass, barStart, 'bass', barLength);
