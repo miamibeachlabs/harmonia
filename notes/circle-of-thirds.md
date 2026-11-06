@@ -15,6 +15,7 @@ from choices that still need confirmation from its author/source.
 - The asymmetric edge lengths are meaningful: major thirds (four semitones) receive a visibly larger geometric span than minor thirds (three semitones). Chord quality does not affect link strength. Harmonia deliberately exaggerates this difference for legibility; the exact source measurement remains unknown.
 - Node and chord-ribbon hue encode the written root letter through Harmonia's fixed color order around the natural Circle of Fifths. Accidentals retain their letter's hue: D♯ shares D's hue, while E♭ shares E's. This is a local interface convention, not a universal music-theory color standard. Shape encodes triad quality: square for major, circle for minor, diamond for diminished, and hexagon for augmented.
 - The selected major key changes note names but not this degree-level structure. Roman-numeral mode deliberately suppresses note names so the same object can be read abstractly.
+- The key picker also names each major key's relative natural minor because the two use exactly the same seven pitch classes. Harmonia keeps the major-key reading fixed in this first study; the label is contextual information, not a mode switch.
 
 ## Deliberately not asserted yet
 
