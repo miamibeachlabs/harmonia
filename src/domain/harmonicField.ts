@@ -193,6 +193,13 @@ const thirdIntervals: Readonly<Record<TriadQuality, readonly [ThirdInterval, Thi
   augmented: ['major-third', 'major-third'],
 };
 
+const chordSuffix: Readonly<Record<TriadQuality, string>> = {
+  major: '',
+  minor: 'm',
+  diminished: '°',
+  augmented: '+',
+};
+
 /** The seven distinct third-links that make the circle's visible skeleton. */
 export const thirdLinksIn = (field: HarmonicField): readonly ThirdLink[] => {
   const seen = new Set<string>();
@@ -212,7 +219,7 @@ export const thirdLinksIn = (field: HarmonicField): readonly ThirdLink[] => {
 
 export const chordName = (field: HarmonicField, root: Degree) => {
   const degree = degreeIn(field, root);
-  return `${degree.note} ${degree.quality}`;
+  return `${degree.note}${chordSuffix[degree.quality]}`;
 };
 
 const naturalPitchClass: Readonly<Record<string, number>> = {

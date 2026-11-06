@@ -163,12 +163,14 @@ export const App = () => {
                 const end = sourceCircleLayout[degreeIn(field, to).geometry];
                 return <line class="progression-link" x1={start.x} y1={start.y} x2={end.x} y2={end.y} marker-end="url(#progression-arrow)" />;
               })}
-              {activeTriads.map(triad => (
-                <polyline
-                  class={`selection ${rootHueClass(degreeIn(field, triad.root).note)}`}
-                  points={chordPath(field, triad)}
-                />
-              ))}
+              {activeTriads.map(triad => {
+                const hue = rootHueClass(degreeIn(field, triad.root).note);
+                const path = chordPath(field, triad);
+                return <g>
+                  <polygon class={`selection-area ${hue}`} points={path} />
+                  <polyline class={`selection-ribbon ${hue}`} points={path} />
+                </g>;
+              })}
             </svg>
             {field.degrees.map(node => {
               const { x, y } = sourceCircleLayout[node.geometry];

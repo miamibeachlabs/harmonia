@@ -61,8 +61,8 @@ h2 { margin: 0; font-size: 1.2rem; font-weight: 650; letter-spacing: -.02em; }
 .third-link { fill: none; stroke-linecap: round; pointer-events: none; }
 .third-link--major-third { stroke: var(--ink); stroke-opacity: .55; stroke-width: 1.35; }
 .third-link--minor-third { stroke: var(--muted); stroke-opacity: .48; stroke-width: .8; }
-.selection { fill: none; pointer-events: none; stroke-linecap: round; stroke-linejoin: round; stroke-width: 14; }
-.selection { stroke-opacity: .38; }
+.selection-area { fill: var(--root-color); fill-opacity: .18; pointer-events: none; }
+.selection-ribbon { fill: none; pointer-events: none; stroke-linecap: round; stroke-linejoin: round; stroke-width: 14; stroke-opacity: .38; }
 .progression-link { fill: none; stroke: var(--ink); stroke-width: 1.15; stroke-opacity: .82; }
 #progression-arrow path { fill: var(--ink); }
 .degree-slot { position: absolute; z-index: 1; width: 50px; height: 50px; transform: translate(-50%, -50%); }
@@ -120,7 +120,7 @@ h2 { margin: 0; font-size: 1.2rem; font-weight: 650; letter-spacing: -.02em; }
 .root-hue-10 { --root-color: var(--root-hue-10); }
 .root-hue-11 { --root-color: var(--root-hue-11); }
 .degree-node.root-hue-0, .degree-node.root-hue-1, .degree-node.root-hue-2, .degree-node.root-hue-3, .degree-node.root-hue-4, .degree-node.root-hue-5, .degree-node.root-hue-6, .degree-node.root-hue-7, .degree-node.root-hue-8, .degree-node.root-hue-9, .degree-node.root-hue-10, .degree-node.root-hue-11 { color: var(--ink); background: var(--root-color); }
-.selection { stroke: var(--root-color); }
+.selection-ribbon { stroke: var(--root-color); }
 .keyboard-chord-list li::before { background: var(--root-color); }
 .keyboard-chord-list--major::before { border-radius: 1px; }
 .keyboard-chord-list--minor::before { border-radius: 50%; }
