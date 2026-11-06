@@ -4,6 +4,7 @@ export type { SoundingChord } from '../domain/voiceLeading.ts';
 
 const beatsPerChord = 4;
 const beatLength = 0.48;
+const barLength = beatsPerChord * beatLength;
 const bassRegister = 36; // C2
 
 type AudioOutput = Readonly<{
@@ -63,14 +64,14 @@ export const createChordPlayer = () => {
     activeOscillators.clear();
   };
 
-  const playNote = (midi: number, when: number, voice: 'chord' | 'bass') => {
+  const playNote = (midi: number, when: number, voice: 'chord' | 'bass', duration = beatLength) => {
     const destination = output;
     if (!destination) return;
 
     const { context, input } = destination;
     const filter = context.createBiquadFilter();
     const envelope = context.createGain();
-    const releaseAt = when + beatLength * 0.87;
+    const releaseAt = when + duration * 0.87;
     const isBass = voice === 'bass';
 
     filter.type = 'lowpass';
@@ -113,10 +114,12 @@ export const createChordPlayer = () => {
       const firstChordAt = output.context.currentTime + 0.04;
       voiceLead(chords).forEach((voicing, chordIndex) => {
         const bass = bassRegister + chords[chordIndex].rootPitchClass;
+        const barStart = firstChordAt + chordIndex * barLength;
+        playNote(bass, barStart, 'bass', barLength);
+
         for (let beat = 0; beat < beatsPerChord; beat += 1) {
-          const when = firstChordAt + (chordIndex * beatsPerChord + beat) * beatLength;
+          const when = barStart + beat * beatLength;
           voicing.forEach(midi => playNote(midi, when, 'chord'));
-          if (beat === 0) playNote(bass, when, 'bass');
         }
       });
     },
