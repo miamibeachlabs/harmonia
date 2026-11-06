@@ -18,7 +18,7 @@ Each chord occupies a four-beat bar. The voiced triad is articulated on every
 beat while its root sustains one octave lower through the bar. The compact chord
 glyph deliberately shows only the three voice-led harmony notes; the bass is
 rhythmic accompaniment, not a fourth chord tone. All glyphs use the same
-two-octave window, positioned to contain the sequence's lowest voice.
+two-octave C3–C5 window, which also bounds voice-leading itself.
 
 Possible later questions: voice-leading between selected chords, individual
 chord audition, tempo, and a more piano-like timbre.

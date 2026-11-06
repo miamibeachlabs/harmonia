@@ -2,7 +2,7 @@ import { useEffect, useState } from 'preact/hooks';
 import { createChordPlayer } from '../audio/chordPlayer.ts';
 import { chordName, chordPitchClasses, degreeIn, harmonicFieldFor, keyCollectionNamed, keyCollections, pitchClassOf, thirdLinksIn, triadIn, type Degree, type DiatonicTriad, type HarmonicField } from '../domain/harmonicField.ts';
 import { majorProgressions, progressionNamed } from '../domain/progressions.ts';
-import { registerFor, voiceLead } from '../domain/voiceLeading.ts';
+import { voiceLead, voicingRegister } from '../domain/voiceLeading.ts';
 import { sourceCircleLayout } from '../projections/circleOfThirds.ts';
 import { ChordGlyph } from './ChordGlyph.tsx';
 import { MiamiBeachLabsBrand } from './MiamiBeachLabsBrand.tsx';
@@ -56,7 +56,6 @@ export const App = () => {
     pitchClasses: chordPitchClasses(field, triad),
   }));
   const voicedChords = voiceLead(soundingChords);
-  const glyphRegister = registerFor(voicedChords);
 
   useEffect(() => () => chordPlayer.stop(), [chordPlayer]);
 
@@ -191,7 +190,7 @@ export const App = () => {
                   const name = chordName(field, triad.root);
                   return <li>
                     <span class="progression-index">{index + 1}</span>
-                    <ChordGlyph rootHue={rootHueClass(root.note)} midiNotes={voicedChords[index] ?? []} register={glyphRegister} label={`${name} in its played voicing`} />
+                    <ChordGlyph rootHue={rootHueClass(root.note)} midiNotes={voicedChords[index] ?? []} register={voicingRegister} label={`${name} in its played voicing`} />
                     <div class="chord-summary">
                       <strong class="chord-degree">{triad.root}</strong>
                       <span class="chord-relation">=</span>
