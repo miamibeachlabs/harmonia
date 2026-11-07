@@ -176,12 +176,14 @@ export const App = () => {
           </label>
           <label>Progression
             <select value={progressionId ?? ''} onChange={event => selectProgression(event.currentTarget.value)}>
-              <option value="">{sequence.isEditable ? sequence.name : 'Free selection'}</option>
               {(Object.entries(progressionFamilies) as readonly [ProgressionFamily, string][]).map(([family, label]) => (
                 <optgroup label={label}>
                   {majorProgressions.filter(option => option.family === family).map(option => <option value={option.id}>{option.label}</option>)}
                 </optgroup>
               ))}
+              <optgroup label="Free selection">
+                <option value="">{sequence.isEditable ? sequence.name : 'Empty — select your own'}</option>
+              </optgroup>
             </select>
           </label>
         </div>
