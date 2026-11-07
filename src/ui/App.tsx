@@ -56,7 +56,7 @@ export const App = () => {
   const [chordPlayer] = useState(createChordPlayer);
   const [collectionId, setCollectionId] = useState('C');
   const [selectedChordIds, setSelectedChordIds] = useState<readonly string[]>([]);
-  const [progressionId, setProgressionId] = useState<string | null>('doo-wop');
+  const [progressionId, setProgressionId] = useState<string | null>('pop-axis');
   const [rotation, setRotation] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [playingStep, setPlayingStep] = useState<number | null>(null);
