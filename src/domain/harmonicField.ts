@@ -161,6 +161,19 @@ export const keyCollections: readonly KeyCollection[] = majorKeyChoices.map((maj
   relativeMinor: minorKeyChoices[index],
 }));
 
+/** Common alternate names for the tonic choices whose spellings are most often encountered both ways. */
+const alternateTonicNames: Readonly<Record<string, string | undefined>> = {
+  'F♯': 'G♭',
+  'D♭': 'C♯',
+  'A♭': 'G♯',
+};
+
+export const keyCollectionLabel = (collection: KeyCollection) => {
+  const alternate = alternateTonicNames[collection.major.tonic];
+  const tonic = alternate ? `${collection.major.tonic} / ${alternate}` : collection.major.tonic;
+  return `${tonic} (${collection.relativeMinor.tonic}m)`;
+};
+
 export const keyCollectionNamed = (id: string): KeyCollection => {
   const found = keyCollections.find(collection => collection.id === id);
   if (!found) throw new Error(`${id} is not available.`);

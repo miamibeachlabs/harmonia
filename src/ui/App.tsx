@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'preact/hooks';
 import { createChordPlayer } from '../audio/chordPlayer.ts';
-import { chordName, chordPitchClasses, degreeIn, harmonicFieldFor, keyCollectionNamed, keyCollections, pitchClassOf, thirdLinksIn, triadIn, type Degree, type DiatonicTriad, type HarmonicField } from '../domain/harmonicField.ts';
+import { chordName, chordPitchClasses, degreeIn, harmonicFieldFor, keyCollectionLabel, keyCollectionNamed, keyCollections, pitchClassOf, thirdLinksIn, triadIn, type Degree, type DiatonicTriad, type HarmonicField } from '../domain/harmonicField.ts';
 import { majorProgressions, progressionFamilies, progressionNamed, rotateBy, type ProgressionFamily } from '../domain/progressions.ts';
 import { canonicalVoicings, voicingRegister } from '../domain/voiceLeading.ts';
 import { sourceCircleLayout } from '../projections/circleOfThirds.ts';
@@ -174,7 +174,7 @@ export const App = () => {
         <div class="view-controls">
           <label>Key
             <select value={collectionId} onChange={event => selectCollection(event.currentTarget.value)}>
-              {keyCollections.map(option => <option value={option.id}>{option.major.tonic} ({option.relativeMinor.tonic}m)</option>)}
+              {keyCollections.map(option => <option value={option.id}>{keyCollectionLabel(option)}</option>)}
             </select>
           </label>
           <label>Progression
