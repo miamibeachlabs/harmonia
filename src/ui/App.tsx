@@ -92,6 +92,7 @@ export const App = () => {
   }));
   const voicedChords = canonicalVoicings(soundingChords);
   const sequenceKey = sequence.degrees.join(':');
+  const playbackContextKey = `${collectionId}|${sequenceKey}`;
 
   useEffect(() => () => chordPlayer.stop(), [chordPlayer]);
 
@@ -99,7 +100,7 @@ export const App = () => {
     chordPlayer.stop();
     setIsPlaying(false);
     setPlayingStep(null);
-  }, [chordPlayer, sequenceKey]);
+  }, [chordPlayer, playbackContextKey]);
 
   useEffect(() => {
     const available = new Set(field.triads.map(triad => chordIdentity(field, triad)));
