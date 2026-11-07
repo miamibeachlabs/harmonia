@@ -18,6 +18,7 @@ const chordPath = (field: HarmonicField, triad: DiatonicTriad) => triad.members.
 const chordNotes = (field: HarmonicField, triad: DiatonicTriad) => triad.members.map(degree => degreeIn(field, degree).note).join(' · ');
 const chordIdentity = (field: HarmonicField, triad: DiatonicTriad) => chordPitchClasses(field, triad).toSorted((a, b) => a - b).join(':');
 const nodeName = (note: string, quality: DiatonicTriad['quality']) => quality === 'minor' ? `${note}m` : note;
+const progressionName = (degrees: readonly Degree[]) => degrees.join('–');
 
 type DisplayedSequence = Readonly<{
   name: string;
@@ -55,6 +56,7 @@ export const App = () => {
     const triad = triadByIdentity.get(identity);
     return triad ? [triad] : [];
   });
+  const selectedDegrees = selectedTriads.map(triad => triad.root);
   const sequence: DisplayedSequence = progression
     ? {
       name: progression.name,
@@ -63,8 +65,8 @@ export const App = () => {
       isEditable: false,
     }
     : {
-      name: 'Free selection',
-      degrees: selectedTriads.map(triad => triad.root),
+      name: progressionName(selectedDegrees) || 'Free selection',
+      degrees: selectedDegrees,
       triads: selectedTriads,
       isEditable: true,
     };
@@ -127,7 +129,7 @@ export const App = () => {
           </label>
           <label>Progression
             <select value={progressionId ?? ''} onChange={event => selectProgression(event.currentTarget.value)}>
-              <option value="">Free selection</option>
+              <option value="">{sequence.isEditable ? sequence.name : 'Free selection'}</option>
               {majorProgressions.map(option => <option value={option.id}>{option.name}</option>)}
             </select>
           </label>
