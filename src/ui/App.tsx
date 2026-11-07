@@ -19,6 +19,13 @@ const chordNotes = (field: HarmonicField, triad: DiatonicTriad) => triad.members
 const chordIdentity = (field: HarmonicField, triad: DiatonicTriad) => chordPitchClasses(field, triad).toSorted((a, b) => a - b).join(':');
 const nodeName = (note: string, quality: DiatonicTriad['quality']) => quality === 'minor' ? `${note}m` : note;
 
+type DisplayedSequence = Readonly<{
+  name: string;
+  degrees: readonly Degree[];
+  triads: readonly DiatonicTriad[];
+  isEditable: boolean;
+}>;
+
 const arrowSegment = (field: HarmonicField, from: Degree, to: Degree) => {
   const start = sourceCircleLayout[degreeIn(field, from).geometry];
   const end = sourceCircleLayout[degreeIn(field, to).geometry];
@@ -48,10 +55,20 @@ export const App = () => {
     const triad = triadByIdentity.get(identity);
     return triad ? [triad] : [];
   });
-  const progressionTriads = progression?.degrees.map(degree => triadIn(field, degree)) ?? [];
-  const activeTriads = progression ? progressionTriads : selectedTriads;
-  const activeDegrees = progression?.degrees ?? activeTriads.map(triad => triad.root);
-  const soundingChords = activeTriads.map(triad => ({
+  const sequence: DisplayedSequence = progression
+    ? {
+      name: progression.name,
+      degrees: progression.degrees,
+      triads: progression.degrees.map(degree => triadIn(field, degree)),
+      isEditable: false,
+    }
+    : {
+      name: 'Free selection',
+      degrees: selectedTriads.map(triad => triad.root),
+      triads: selectedTriads,
+      isEditable: true,
+    };
+  const soundingChords = sequence.triads.map(triad => ({
     rootPitchClass: pitchClassOf(degreeIn(field, triad.root).note),
     pitchClasses: chordPitchClasses(field, triad),
   }));
@@ -128,7 +145,7 @@ export const App = () => {
 
           <div class="circle-stage">
             <svg class="circle" viewBox="0 0 100 100" aria-hidden="true">
-              {activeDegrees.length > 1 && <defs>
+              {sequence.degrees.length > 1 && <defs>
                 <marker id="progression-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
                   <path d="M 0 0 L 10 5 L 0 10 z" />
                 </marker>
@@ -142,12 +159,12 @@ export const App = () => {
                   y2={sourceCircleLayout[degreeIn(field, link.to).geometry].y}
                 />
               ))}
-              {activeDegrees.slice(1).map((to, index) => {
-                const from = activeDegrees[index];
+              {sequence.degrees.slice(1).map((to, index) => {
+                const from = sequence.degrees[index];
                 const segment = arrowSegment(field, from, to);
                 return <line class="progression-link" {...segment} marker-end="url(#progression-arrow)" />;
               })}
-              {activeTriads.map(triad => {
+              {sequence.triads.map(triad => {
                 const hue = rootHueClass(degreeIn(field, triad.root).note);
                 return <polygon class={`selection ${hue}`} points={chordPath(field, triad)} />;
               })}
@@ -155,8 +172,8 @@ export const App = () => {
             {field.degrees.map(node => {
               const { x, y } = sourceCircleLayout[node.geometry];
               const triad = triadIn(field, node.degree);
-              const selected = activeTriads.some(active => active.root === triad.root);
-              const steps = activeDegrees.flatMap((degree, index) => degree === node.degree ? [index + 1] : []);
+              const selected = sequence.triads.some(active => active.root === triad.root);
+              const steps = sequence.degrees.flatMap((degree, index) => degree === node.degree ? [index + 1] : []);
               return (
                 <div class="degree-slot" style={{ left: `${x}%`, top: `${y}%` }}>
                   <button
@@ -180,12 +197,12 @@ export const App = () => {
         </section>
 
         <aside class="reading surface" aria-labelledby="reading-title">
-          <p class="eyebrow">{progression ? 'PROGRESSION' : 'CHORDS IN VIEW'}</p>
-          <h2 id="reading-title">{progression?.name ?? (activeTriads.length ? 'Selected chords' : 'Nothing selected yet')}</h2>
-          {activeTriads.length ? (
+          <p class="eyebrow">PROGRESSION</p>
+          <h2 id="reading-title">{sequence.name}</h2>
+          {sequence.triads.length ? (
             <>
               <ul class="chord-list">
-                {activeTriads.map((triad, index) => {
+                {sequence.triads.map((triad, index) => {
                   const root = degreeIn(field, triad.root);
                   const name = chordName(field, triad.root);
                   return <li>
@@ -197,18 +214,18 @@ export const App = () => {
                       <strong class="chord-name">{name}</strong>
                       <span class="chord-notes">({chordNotes(field, triad)})</span>
                     </div>
-                    {!progression && <span class="chord-actions" aria-label={`Edit ${name} at step ${index + 1}`}>
+                    {sequence.isEditable && <span class="chord-actions" aria-label={`Edit ${name} at step ${index + 1}`}>
                       <button class="chord-action--remove" aria-label={`Remove ${name}`} onClick={() => removeChord(index)}>×</button>
                       <button class="chord-action--move" disabled={index === 0} aria-label={`Move ${name} earlier`} onClick={() => moveChord(index, index - 1)}>↑</button>
-                      <button class="chord-action--move" disabled={index === activeTriads.length - 1} aria-label={`Move ${name} later`} onClick={() => moveChord(index, index + 1)}>↓</button>
+                      <button class="chord-action--move" disabled={index === sequence.triads.length - 1} aria-label={`Move ${name} later`} onClick={() => moveChord(index, index + 1)}>↓</button>
                     </span>}
                   </li>;
                 })}
               </ul>
               <button class="primary play-sequence" onClick={() => void chordPlayer.playSequence(soundingChords)}>Play sequence</button>
             </>
-          ) : <p>Tap {field.tonic} to shade its tonic chord. Select more roots to compare overlapping chords.</p>}
-          {!progression && activeTriads.length > 0 && <button class="clear" onClick={() => setSelectedChordIds([])}>Clear selection</button>}
+          ) : <p>Choose roots in the circle to build a progression.</p>}
+          {sequence.isEditable && sequence.triads.length > 0 && <button class="clear" onClick={() => setSelectedChordIds([])}>Clear selection</button>}
 
         </aside>
       </main>
@@ -220,13 +237,13 @@ export const App = () => {
             <h2 id="keyboard-title">Every octave</h2>
           </div>
         </div>
-        <PianoKeyboard chords={activeTriads.map(triad => ({
+        <PianoKeyboard chords={sequence.triads.map(triad => ({
           rootHue: rootHueClass(degreeIn(field, triad.root).note),
           quality: triad.quality,
           pitchClasses: chordPitchClasses(field, triad),
         }))} />
-        {activeTriads.length > 0 && <ul class="keyboard-chord-list">
-          {activeTriads.map((triad, index) => {
+        {sequence.triads.length > 0 && <ul class="keyboard-chord-list">
+          {sequence.triads.map((triad, index) => {
             const root = degreeIn(field, triad.root);
             return <li class={`${rootHueClass(root.note)} keyboard-chord-list--${triad.quality}`}>
               <em>{index + 1}</em>
