@@ -11,7 +11,7 @@ export type ProgressionFamily = 'foundations' | 'cadences' | 'loops' | 'explorat
 
 export const progressionFamilies: Readonly<Record<ProgressionFamily, string>> = {
   foundations: 'Foundations',
-  cadences: 'Cadences & turnarounds',
+  cadences: 'Cadences and turnarounds',
   loops: 'Modern repeating loops',
   exploration: 'Harmonic exploration',
 };
@@ -27,18 +27,20 @@ export const rotateBy = <Item>(items: readonly Item[], count: number): readonly 
 
 /** A small, diatonic-major starting library for studying ordered harmonic motion. */
 export const majorProgressions: readonly Progression[] = [
-  progression('authentic', 'foundations', 'Authentic resolution · I–V–I', ['I', 'V', 'I']),
-  progression('plagal', 'foundations', 'Plagal motion · I–IV–I', ['I', 'IV', 'I']),
-  progression('primary-triads', 'foundations', 'Primary-chord cycle · I–IV–V–I', ['I', 'IV', 'V', 'I']),
-  progression('two-five-one', 'cadences', 'Jazz cadence · ii–V–I', ['ii', 'V', 'I']),
-  progression('turnaround', 'cadences', 'Turnaround · I–vi–ii–V', ['I', 'vi', 'ii', 'V']),
-  progression('doo-wop', 'cadences', "'50s / doo-wop · I–vi–IV–V", ['I', 'vi', 'IV', 'V']),
-  progression('pop-axis', 'loops', 'Axis / four-chord pop · I–V–vi–IV', ['I', 'V', 'vi', 'IV']),
-  progression('pop-variation', 'loops', 'Pop variation · I–IV–vi–V', ['I', 'IV', 'vi', 'V']),
-  progression('mediant', 'exploration', 'Mediant motion · I–iii–IV–V', ['I', 'iii', 'IV', 'V']),
-  progression('descending-fifths', 'exploration', 'Descending fifths · I–vi–ii–V', ['I', 'vi', 'ii', 'V']),
-  progression('extended-circle', 'exploration', 'Extended circle · iii–vi–ii–V–I', ['iii', 'vi', 'ii', 'V', 'I']),
-  progression('leading-tone', 'exploration', 'Leading-tone resolution · vii°–I', ['vii°', 'I']),
+  progression('authentic', 'foundations', 'I–V–I · Authentic resolution', ['I', 'V', 'I']),
+  progression('plagal', 'foundations', 'I–IV–I · Plagal motion', ['I', 'IV', 'I']),
+  progression('primary-triads', 'foundations', 'I–IV–V–I · Primary-chord cycle', ['I', 'IV', 'V', 'I']),
+  progression('two-five-one', 'cadences', 'ii–V–I · Jazz cadence', ['ii', 'V', 'I']),
+  progression('turnaround', 'cadences', 'I–vi–ii–V · Jazz turnaround', ['I', 'vi', 'ii', 'V']),
+  progression('doo-wop', 'cadences', "I–vi–IV–V · '50s / doo-wop", ['I', 'vi', 'IV', 'V']),
+  progression('pop-axis', 'loops', 'I–V–vi–IV · Axis / four-chord pop', ['I', 'V', 'vi', 'IV']),
+  progression('axis-rotation', 'loops', 'vi–IV–I–V · Axis rotation', ['vi', 'IV', 'I', 'V']),
+  progression('doo-wop-loop', 'loops', 'I–vi–IV–V · Doo-wop loop', ['I', 'vi', 'IV', 'V']),
+  progression('pop-variation', 'loops', 'I–IV–vi–V · Pop variation', ['I', 'IV', 'vi', 'V']),
+  progression('mediant', 'exploration', 'I–iii–IV–V · Mediant motion', ['I', 'iii', 'IV', 'V']),
+  progression('descending-fifths', 'exploration', 'I–vi–ii–V · Descending-fifths roots', ['I', 'vi', 'ii', 'V']),
+  progression('extended-circle', 'exploration', 'iii–vi–ii–V–I · Extended circle progression', ['iii', 'vi', 'ii', 'V', 'I']),
+  progression('leading-tone', 'exploration', 'vii°–I · Leading-tone resolution', ['vii°', 'I']),
 ];
 
 export const progressionNamed = (id: string): Progression => {
