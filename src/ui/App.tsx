@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'preact/hooks';
 import { createChordPlayer } from '../audio/chordPlayer.ts';
 import { chordName, chordPitchClasses, degreeIn, harmonicFieldFor, keyCollectionNamed, keyCollections, pitchClassOf, thirdLinksIn, triadIn, type Degree, type DiatonicTriad, type HarmonicField } from '../domain/harmonicField.ts';
-import { majorProgressions, progressionFamilies, progressionNamed, rotate, rotateBy, type ProgressionFamily } from '../domain/progressions.ts';
+import { majorProgressions, progressionFamilies, progressionNamed, rotateBy, type ProgressionFamily } from '../domain/progressions.ts';
 import { canonicalVoicings, voicingRegister } from '../domain/voiceLeading.ts';
 import { sourceCircleLayout } from '../projections/circleOfThirds.ts';
 import { ChordGlyph } from './ChordGlyph.tsx';
@@ -137,13 +137,13 @@ export const App = () => {
     setSelectedChordIds([]);
   };
 
-  const rotateSequence = () => {
+  const rotateSequence = (direction: -1 | 1) => {
     if (sequence.degrees.length < 2) return;
     if (progression) {
-      setRotation(current => current + 1);
+      setRotation(current => current + direction);
       return;
     }
-    setSelectedChordIds(selected => rotate(selected));
+    setSelectedChordIds(selected => rotateBy(selected, direction));
   };
 
   const togglePlayback = () => {
@@ -257,7 +257,11 @@ export const App = () => {
               <p class="eyebrow">PROGRESSION</p>
               <h2 id="reading-title">{sequence.name}</h2>
             </div>
-            <button class="rotate" aria-label="Rotate progression" disabled={sequence.degrees.length < 2} onClick={rotateSequence}>↻</button>
+            <div class="rotation-controls" aria-label="Rotate progression">
+              <span>Rotate</span>
+              <button class="rotate" aria-label="Rotate progression backward" disabled={sequence.degrees.length < 2} onClick={() => rotateSequence(-1)}>↶</button>
+              <button class="rotate" aria-label="Rotate progression forward" disabled={sequence.degrees.length < 2} onClick={() => rotateSequence(1)}>↷</button>
+            </div>
           </div>
           {sequence.triads.length ? (
             <>
