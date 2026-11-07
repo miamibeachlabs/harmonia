@@ -33,12 +33,22 @@ const arrowSegment = (field: HarmonicField, from: Degree, to: Degree) => {
   const dx = end.x - start.x;
   const dy = end.y - start.y;
   const distance = Math.hypot(dx, dy);
+  if (!distance) return null;
   const inset = 6;
+  const unitX = dx / distance;
+  const unitY = dy / distance;
+  const tipX = end.x - unitX * inset;
+  const tipY = end.y - unitY * inset;
+  const baseX = tipX - unitX * 3;
+  const baseY = tipY - unitY * 3;
+  const perpendicularX = -unitY * 2;
+  const perpendicularY = unitX * 2;
   return {
-    x1: start.x + dx / distance * inset,
-    y1: start.y + dy / distance * inset,
-    x2: end.x - dx / distance * inset,
-    y2: end.y - dy / distance * inset,
+    x1: start.x + unitX * inset,
+    y1: start.y + unitY * inset,
+    x2: tipX,
+    y2: tipY,
+    head: `${tipX},${tipY} ${baseX + perpendicularX},${baseY + perpendicularY} ${baseX - perpendicularX},${baseY - perpendicularY}`,
   };
 };
 
@@ -188,11 +198,6 @@ export const App = () => {
 
           <div class="circle-stage">
             <svg class="circle" viewBox="0 0 100 100" aria-hidden="true">
-              {sequence.degrees.length > 1 && <defs>
-                <marker id="progression-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-                  <path d="M 0 0 L 10 5 L 0 10 z" />
-                </marker>
-              </defs>}
               {thirdLinks.map(link => (
                 <line
                   class={`third-link third-link--${link.interval}`}
@@ -205,7 +210,11 @@ export const App = () => {
               {sequence.degrees.slice(1).map((to, index) => {
                 const from = sequence.degrees[index];
                 const segment = arrowSegment(field, from, to);
-                return <line class="progression-link" {...segment} marker-end="url(#progression-arrow)" />;
+                if (!segment) return null;
+                return <>
+                  <line class="progression-link" x1={segment.x1} y1={segment.y1} x2={segment.x2} y2={segment.y2} />
+                  <polygon class="progression-arrowhead" points={segment.head} />
+                </>;
               })}
               {sequence.triads.map(triad => {
                 const hue = rootHueClass(degreeIn(field, triad.root).note);
