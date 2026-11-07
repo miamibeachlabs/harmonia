@@ -10,10 +10,11 @@ export type Progression = Readonly<{
 
 export type ProgressionFamily = 'foundations' | 'cadences' | 'loops' | 'exploration';
 
+/** Presented in the order a player is most likely to reach for them. */
 export const progressionFamilies: Readonly<Record<ProgressionFamily, string>> = {
-  foundations: 'Foundations',
-  cadences: 'Cadences and turnarounds',
   loops: 'Pop & Traditional Loops',
+  cadences: 'Cadences and turnarounds',
+  foundations: 'Foundations',
   exploration: 'Harmonic exploration',
 };
 
@@ -35,9 +36,9 @@ export const majorProgressions: readonly Progression[] = [
   progression('primary-triads', 'foundations', 'I–IV–V–I · Primary-chord cycle', 'Uses the three primary chords of a major key to establish, depart from, and return to the tonic. Together they contain all seven notes of the major scale.', ['I', 'IV', 'V', 'I']),
   progression('two-five-one', 'cadences', 'ii–V–I · Jazz cadence', 'The quintessential jazz progression: ii prepares the dominant V, which resolves to tonic I. Its roots move by descending fifths, creating strong harmonic direction.', ['ii', 'V', 'I']),
   progression('turnaround', 'cadences', 'I–vi–ii–V · Jazz turnaround', 'A classic turnaround that leaves the tonic and works back toward it through descending-fifth root motion. It is designed to lead naturally into the next repetition.', ['I', 'vi', 'ii', 'V']),
-  progression('doo-wop', 'loops', "I–vi–IV–V · '50s / Doo-wop", 'The signature four-chord loop of 1950s doo-wop and early rock and roll. It moves from tonic to its relative minor, then through IV and V back to I.', ['I', 'vi', 'IV', 'V']),
   progression('pop-axis', 'loops', 'I–V–vi–IV · Axis / Four-chord pop', 'One of the most recognizable progressions in modern popular music. Its cyclic rotations produce several other familiar pop progressions.', ['I', 'V', 'vi', 'IV']),
   progression('axis-rotation', 'loops', 'vi–IV–I–V · Axis rotation', 'A rotation of I–V–vi–IV that begins on the relative minor. It uses the same chords in the same cyclic order, but changes which chord receives the initial emphasis.', ['vi', 'IV', 'I', 'V']),
+  progression('doo-wop', 'loops', "I–vi–IV–V · '50s / Doo-wop", 'The signature four-chord loop of 1950s doo-wop and early rock and roll. It moves from tonic to its relative minor, then through IV and V back to I.', ['I', 'vi', 'IV', 'V']),
   progression('pop-variation', 'loops', 'I–IV–vi–V · Pop variation', 'A four-chord loop that moves through subdominant and relative minor before reaching dominant. Ending on V creates a strong pull back to I on every repetition.', ['I', 'IV', 'vi', 'V']),
   progression('mediant', 'exploration', 'I–iii–IV–V · Mediant motion', 'Introduces iii, the mediant chord, which shares two notes with I. This creates a smooth harmonic transition before moving to IV and V.', ['I', 'iii', 'IV', 'V']),
   progression('extended-circle', 'exploration', 'iii–vi–ii–V–I · Extended circle progression', 'A longer chain of descending-fifth root movements that passes through several diatonic chords before resolving to I. It reveals a systematic harmonic pattern rather than an arbitrary sequence.', ['iii', 'vi', 'ii', 'V', 'I']),
