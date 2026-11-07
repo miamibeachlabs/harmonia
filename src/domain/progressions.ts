@@ -22,8 +22,10 @@ const progression = (id: string, family: ProgressionFamily, label: string, degre
 export const rotate = <Item>(items: readonly Item[]): readonly Item[] =>
   items.length > 1 ? [...items.slice(1), items[0]] : items;
 
-export const rotateBy = <Item>(items: readonly Item[], count: number): readonly Item[] =>
-  Array.from({ length: items.length ? count % items.length : 0 }).reduce<readonly Item[]>(ordered => rotate(ordered), items);
+export const rotateBy = <Item>(items: readonly Item[], count: number): readonly Item[] => {
+  const positions = items.length ? (count % items.length + items.length) % items.length : 0;
+  return Array.from({ length: positions }).reduce<readonly Item[]>(ordered => rotate(ordered), items);
+};
 
 /** A small, diatonic-major starting library for studying ordered harmonic motion. */
 export const majorProgressions: readonly Progression[] = [
