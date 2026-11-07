@@ -22,6 +22,7 @@ const progressionName = (degrees: readonly Degree[]) => degrees.join('–');
 
 type DisplayedSequence = Readonly<{
   name: string;
+  description?: string;
   degrees: readonly Degree[];
   triads: readonly DiatonicTriad[];
   isEditable: boolean;
@@ -74,6 +75,7 @@ export const App = () => {
   const sequence: DisplayedSequence = progression
     ? {
       name: progressionName(progressionDegrees),
+      description: progression.description,
       degrees: progressionDegrees,
       triads: progressionDegrees.map(degree => triadIn(field, degree)),
       isEditable: false,
@@ -263,6 +265,7 @@ export const App = () => {
               <button class="rotate" aria-label="Rotate progression forward" disabled={sequence.degrees.length < 2} onClick={() => rotateSequence(1)}>↷</button>
             </div>
           </div>
+          {sequence.description && <p class="progression-description">{sequence.description}</p>}
           {sequence.triads.length ? (
             <>
               <ul class="chord-list">
