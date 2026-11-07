@@ -12,7 +12,7 @@ export type ProgressionFamily = 'foundations' | 'cadences' | 'loops' | 'explorat
 export const progressionFamilies: Readonly<Record<ProgressionFamily, string>> = {
   foundations: 'Foundations',
   cadences: 'Cadences & turnarounds',
-  loops: 'Repeating loops',
+  loops: 'Modern repeating loops',
   exploration: 'Harmonic exploration',
 };
 
@@ -33,7 +33,7 @@ export const majorProgressions: readonly Progression[] = [
   progression('two-five-one', 'cadences', 'Jazz cadence · ii–V–I', ['ii', 'V', 'I']),
   progression('turnaround', 'cadences', 'Turnaround · I–vi–ii–V', ['I', 'vi', 'ii', 'V']),
   progression('doo-wop', 'cadences', "'50s / doo-wop · I–vi–IV–V", ['I', 'vi', 'IV', 'V']),
-  progression('pop-axis', 'loops', 'Axis progression · I–V–vi–IV', ['I', 'V', 'vi', 'IV']),
+  progression('pop-axis', 'loops', 'Axis / four-chord pop · I–V–vi–IV', ['I', 'V', 'vi', 'IV']),
   progression('pop-variation', 'loops', 'Pop variation · I–IV–vi–V', ['I', 'IV', 'vi', 'V']),
   progression('mediant', 'exploration', 'Mediant motion · I–iii–IV–V', ['I', 'iii', 'IV', 'V']),
   progression('descending-fifths', 'exploration', 'Descending fifths · I–vi–ii–V', ['I', 'vi', 'ii', 'V']),
