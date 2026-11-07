@@ -60,11 +60,12 @@ h2 { margin: 0; font-size: 1.2rem; font-weight: 650; letter-spacing: -.02em; }
 .third-link--minor-third { stroke: var(--muted); stroke-opacity: .48; stroke-width: .8; }
 .selection { fill: var(--root-color); stroke: var(--root-color); stroke-linejoin: round; stroke-width: 14; opacity: .32; pointer-events: none; }
 .progression-link { fill: none; stroke: var(--turquoise); stroke-width: 1.65; stroke-dasharray: 2.5 1.5; stroke-opacity: .92; }
-#progression-arrow path { fill: var(--turquoise); }
+.progression-arrowhead { fill: var(--turquoise); }
 .degree-slot { position: absolute; z-index: 1; width: 50px; height: 50px; transform: translate(-50%, -50%); }
 .degree-node { position: relative; display: grid; place-items: center; width: 100%; height: 100%; min-height: 0; padding: 0; border: 2px solid var(--ink); color: var(--ink); transition: transform .15s ease, box-shadow .15s ease; }
 .degree-node:hover { transform: scale(1.08); filter: brightness(.96); }
 .degree-node.is-selected { box-shadow: 0 0 0 5px color-mix(in srgb, var(--turquoise) 24%, transparent); }
+.degree-node.is-playing { box-shadow: 0 0 0 5px color-mix(in srgb, var(--coral) 58%, transparent), 0 0 0 9px color-mix(in srgb, var(--turquoise) 18%, transparent); }
 .degree-node--major { border-radius: 3px; }
 .degree-node--minor { border-radius: 50%; }
 .degree-node--diminished { border-radius: 0; clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
@@ -79,8 +80,11 @@ h2 { margin: 0; font-size: 1.2rem; font-weight: 650; letter-spacing: -.02em; }
 .legend-line--minor-third { border-top: 1px solid var(--muted); }
 .reading { margin-top: 28px; }
 .reading p:last-child { margin-bottom: 0; }
+.reading-heading { display: flex; align-items: end; justify-content: space-between; gap: 12px; }
+.rotate { display: grid; place-items: center; width: 34px; min-width: 34px; min-height: 34px; padding: 0; color: var(--turquoise); border-color: color-mix(in srgb, var(--turquoise) 42%, var(--line)); font-size: 1.35rem; line-height: 1; }
 .chord-list { display: grid; gap: 10px; padding: 0; margin: 18px 0; list-style: none; }
 .chord-list li { display: grid; grid-template: "index glyph . actions" auto "summary summary summary summary" auto / 22px 92px minmax(0, 1fr) auto; column-gap: 10px; align-items: start; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+.chord-list li.is-playing { background: color-mix(in srgb, var(--seafoam) 28%, transparent); }
 .progression-index { grid-area: index; display: grid; place-items: center; width: 22px; height: 22px; color: var(--surface); background: var(--ink); border-radius: 50%; font-size: .75rem; font-weight: 800; }
 .chord-glyph { grid-area: glyph; width: 92px; height: auto; }
 .chord-glyph__white { fill: var(--surface); stroke: var(--ink); stroke-width: .1; }

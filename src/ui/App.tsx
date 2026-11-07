@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'preact/hooks';
 import { createChordPlayer } from '../audio/chordPlayer.ts';
 import { chordName, chordPitchClasses, degreeIn, harmonicFieldFor, keyCollectionNamed, keyCollections, pitchClassOf, thirdLinksIn, triadIn, type Degree, type DiatonicTriad, type HarmonicField } from '../domain/harmonicField.ts';
-import { majorProgressions, progressionNamed } from '../domain/progressions.ts';
+import { majorProgressions, progressionFamilies, progressionNamed, rotate, rotateBy, type ProgressionFamily } from '../domain/progressions.ts';
 import { canonicalVoicings, voicingRegister } from '../domain/voiceLeading.ts';
 import { sourceCircleLayout } from '../projections/circleOfThirds.ts';
 import { ChordGlyph } from './ChordGlyph.tsx';
@@ -33,12 +33,22 @@ const arrowSegment = (field: HarmonicField, from: Degree, to: Degree) => {
   const dx = end.x - start.x;
   const dy = end.y - start.y;
   const distance = Math.hypot(dx, dy);
+  if (!distance) return null;
   const inset = 6;
+  const unitX = dx / distance;
+  const unitY = dy / distance;
+  const tipX = end.x - unitX * inset;
+  const tipY = end.y - unitY * inset;
+  const baseX = tipX - unitX * 3;
+  const baseY = tipY - unitY * 3;
+  const perpendicularX = -unitY * 2;
+  const perpendicularY = unitX * 2;
   return {
-    x1: start.x + dx / distance * inset,
-    y1: start.y + dy / distance * inset,
-    x2: end.x - dx / distance * inset,
-    y2: end.y - dy / distance * inset,
+    x1: start.x + unitX * inset,
+    y1: start.y + unitY * inset,
+    x2: tipX,
+    y2: tipY,
+    head: `${tipX},${tipY} ${baseX + perpendicularX},${baseY + perpendicularY} ${baseX - perpendicularX},${baseY - perpendicularY}`,
   };
 };
 
@@ -46,7 +56,10 @@ export const App = () => {
   const [chordPlayer] = useState(createChordPlayer);
   const [collectionId, setCollectionId] = useState('C');
   const [selectedChordIds, setSelectedChordIds] = useState<readonly string[]>([]);
-  const [progressionId, setProgressionId] = useState<string | null>('doo-wop');
+  const [progressionId, setProgressionId] = useState<string | null>('pop-axis');
+  const [rotation, setRotation] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [playingStep, setPlayingStep] = useState<number | null>(null);
   const collection = keyCollectionNamed(collectionId);
   const field = harmonicFieldFor(collection.major, 'natural');
   const thirdLinks = thirdLinksIn(field);
@@ -57,11 +70,12 @@ export const App = () => {
     return triad ? [triad] : [];
   });
   const selectedDegrees = selectedTriads.map(triad => triad.root);
+  const progressionDegrees = progression ? rotateBy(progression.degrees, rotation) : [];
   const sequence: DisplayedSequence = progression
     ? {
-      name: progression.name,
-      degrees: progression.degrees,
-      triads: progression.degrees.map(degree => triadIn(field, degree)),
+      name: progressionName(progressionDegrees),
+      degrees: progressionDegrees,
+      triads: progressionDegrees.map(degree => triadIn(field, degree)),
       isEditable: false,
     }
     : {
@@ -75,8 +89,15 @@ export const App = () => {
     pitchClasses: chordPitchClasses(field, triad),
   }));
   const voicedChords = canonicalVoicings(soundingChords);
+  const sequenceKey = sequence.degrees.join(':');
 
   useEffect(() => () => chordPlayer.stop(), [chordPlayer]);
+
+  useEffect(() => {
+    chordPlayer.stop();
+    setIsPlaying(false);
+    setPlayingStep(null);
+  }, [chordPlayer, sequenceKey]);
 
   useEffect(() => {
     const available = new Set(field.triads.map(triad => chordIdentity(field, triad)));
@@ -93,6 +114,7 @@ export const App = () => {
 
   const addChord = (triad: DiatonicTriad) => {
     setProgressionId(null);
+    setRotation(0);
     const identity = chordIdentity(field, triad);
     setSelectedChordIds(selected => [...selected, identity]);
   };
@@ -111,7 +133,32 @@ export const App = () => {
 
   const selectProgression = (id: string) => {
     setProgressionId(id || null);
+    setRotation(0);
     setSelectedChordIds([]);
+  };
+
+  const rotateSequence = () => {
+    if (sequence.degrees.length < 2) return;
+    if (progression) {
+      setRotation(current => current + 1);
+      return;
+    }
+    setSelectedChordIds(selected => rotate(selected));
+  };
+
+  const togglePlayback = () => {
+    if (isPlaying) {
+      chordPlayer.stop();
+      setIsPlaying(false);
+      setPlayingStep(null);
+      return;
+    }
+
+    setIsPlaying(true);
+    void chordPlayer.playLoop(soundingChords, setPlayingStep).catch(() => {
+      setIsPlaying(false);
+      setPlayingStep(null);
+    });
   };
 
   return (
@@ -129,8 +176,14 @@ export const App = () => {
           </label>
           <label>Progression
             <select value={progressionId ?? ''} onChange={event => selectProgression(event.currentTarget.value)}>
-              <option value="">{sequence.isEditable ? sequence.name : 'Free selection'}</option>
-              {majorProgressions.map(option => <option value={option.id}>{option.name}</option>)}
+              {(Object.entries(progressionFamilies) as readonly [ProgressionFamily, string][]).map(([family, label]) => (
+                <optgroup label={label}>
+                  {majorProgressions.filter(option => option.family === family).map(option => <option value={option.id}>{option.label}</option>)}
+                </optgroup>
+              ))}
+              <optgroup label="Free selection">
+                <option value="">{sequence.isEditable ? sequence.name : 'Empty — select your own'}</option>
+              </optgroup>
             </select>
           </label>
         </div>
@@ -147,11 +200,6 @@ export const App = () => {
 
           <div class="circle-stage">
             <svg class="circle" viewBox="0 0 100 100" aria-hidden="true">
-              {sequence.degrees.length > 1 && <defs>
-                <marker id="progression-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-                  <path d="M 0 0 L 10 5 L 0 10 z" />
-                </marker>
-              </defs>}
               {thirdLinks.map(link => (
                 <line
                   class={`third-link third-link--${link.interval}`}
@@ -164,7 +212,11 @@ export const App = () => {
               {sequence.degrees.slice(1).map((to, index) => {
                 const from = sequence.degrees[index];
                 const segment = arrowSegment(field, from, to);
-                return <line class="progression-link" {...segment} marker-end="url(#progression-arrow)" />;
+                if (!segment) return null;
+                return <>
+                  <line class="progression-link" x1={segment.x1} y1={segment.y1} x2={segment.x2} y2={segment.y2} />
+                  <polygon class="progression-arrowhead" points={segment.head} />
+                </>;
               })}
               {sequence.triads.map(triad => {
                 const hue = rootHueClass(degreeIn(field, triad.root).note);
@@ -175,11 +227,12 @@ export const App = () => {
               const { x, y } = sourceCircleLayout[node.geometry];
               const triad = triadIn(field, node.degree);
               const selected = sequence.triads.some(active => active.root === triad.root);
+              const playing = playingStep !== null && sequence.degrees[playingStep] === node.degree;
               const steps = sequence.degrees.flatMap((degree, index) => degree === node.degree ? [index + 1] : []);
               return (
                 <div class="degree-slot" style={{ left: `${x}%`, top: `${y}%` }}>
                   <button
-                    class={`degree-node degree-node--${node.quality} ${rootHueClass(node.note)} ${selected ? 'is-selected' : ''}`}
+                    class={`degree-node degree-node--${node.quality} ${rootHueClass(node.note)} ${selected ? 'is-selected' : ''} ${playing ? 'is-playing' : ''}`}
                     aria-label={`Add ${node.note} ${node.quality} chord, ${node.degree}`}
                     onClick={() => addChord(triad)}
                   >
@@ -199,15 +252,20 @@ export const App = () => {
         </section>
 
         <aside class="reading surface" aria-labelledby="reading-title">
-          <p class="eyebrow">PROGRESSION</p>
-          <h2 id="reading-title">{sequence.name}</h2>
+          <div class="reading-heading">
+            <div>
+              <p class="eyebrow">PROGRESSION</p>
+              <h2 id="reading-title">{sequence.name}</h2>
+            </div>
+            <button class="rotate" aria-label="Rotate progression" disabled={sequence.degrees.length < 2} onClick={rotateSequence}>↻</button>
+          </div>
           {sequence.triads.length ? (
             <>
               <ul class="chord-list">
                 {sequence.triads.map((triad, index) => {
                   const root = degreeIn(field, triad.root);
                   const name = chordName(field, triad.root);
-                  return <li>
+                  return <li class={playingStep === index ? 'is-playing' : ''}>
                     <span class="progression-index">{index + 1}</span>
                     <ChordGlyph rootHue={rootHueClass(root.note)} midiNotes={voicedChords[index] ?? []} register={voicingRegister} label={`${name} in its played voicing`} />
                     <div class="chord-summary">
@@ -224,7 +282,7 @@ export const App = () => {
                   </li>;
                 })}
               </ul>
-              <button class="primary play-sequence" onClick={() => void chordPlayer.playSequence(soundingChords)}>Play sequence</button>
+              <button class="primary play-sequence" onClick={togglePlayback}>{isPlaying ? 'Stop' : 'Play'}</button>
             </>
           ) : <p>Choose roots in the circle to build a progression.</p>}
           {sequence.isEditable && sequence.triads.length > 0 && <button class="clear" onClick={() => setSelectedChordIds([])}>Clear selection</button>}
