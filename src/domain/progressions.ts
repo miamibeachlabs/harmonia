@@ -2,20 +2,43 @@ import type { Degree } from './harmonicField.ts';
 
 export type Progression = Readonly<{
   id: string;
-  name: string;
+  label: string;
+  family: ProgressionFamily;
   degrees: readonly Degree[];
 }>;
 
-const progression = (id: string, name: string, degrees: readonly Degree[]): Progression => ({ id, name, degrees });
+export type ProgressionFamily = 'foundations' | 'cadences' | 'loops' | 'exploration';
+
+export const progressionFamilies: Readonly<Record<ProgressionFamily, string>> = {
+  foundations: 'Foundations',
+  cadences: 'Cadences & turnarounds',
+  loops: 'Repeating loops',
+  exploration: 'Harmonic exploration',
+};
+
+const progression = (id: string, family: ProgressionFamily, label: string, degrees: readonly Degree[]): Progression => ({ id, family, label, degrees });
+
+/** Moves the first chord to the end without changing the cycle's order. */
+export const rotate = <Item>(items: readonly Item[]): readonly Item[] =>
+  items.length > 1 ? [...items.slice(1), items[0]] : items;
+
+export const rotateBy = <Item>(items: readonly Item[], count: number): readonly Item[] =>
+  Array.from({ length: items.length ? count % items.length : 0 }).reduce<readonly Item[]>(ordered => rotate(ordered), items);
 
 /** A small, diatonic-major starting library for studying ordered harmonic motion. */
 export const majorProgressions: readonly Progression[] = [
-  progression('pop-axis', 'I–V–vi–IV', ['I', 'V', 'vi', 'IV']),
-  progression('doo-wop', 'I–vi–IV–V', ['I', 'vi', 'IV', 'V']),
-  progression('two-five-one', 'ii–V–I', ['ii', 'V', 'I']),
-  progression('primary-triads', 'I–IV–V–I', ['I', 'IV', 'V', 'I']),
-  progression('pop-rotation', 'vi–IV–I–V', ['vi', 'IV', 'I', 'V']),
-  progression('turnaround', 'I–vi–ii–V', ['I', 'vi', 'ii', 'V']),
+  progression('authentic', 'foundations', 'Authentic resolution · I–V–I', ['I', 'V', 'I']),
+  progression('plagal', 'foundations', 'Plagal motion · I–IV–I', ['I', 'IV', 'I']),
+  progression('primary-triads', 'foundations', 'Primary-chord cycle · I–IV–V–I', ['I', 'IV', 'V', 'I']),
+  progression('two-five-one', 'cadences', 'Jazz cadence · ii–V–I', ['ii', 'V', 'I']),
+  progression('turnaround', 'cadences', 'Turnaround · I–vi–ii–V', ['I', 'vi', 'ii', 'V']),
+  progression('doo-wop', 'cadences', "'50s / doo-wop · I–vi–IV–V", ['I', 'vi', 'IV', 'V']),
+  progression('pop-axis', 'loops', 'Axis progression · I–V–vi–IV', ['I', 'V', 'vi', 'IV']),
+  progression('pop-variation', 'loops', 'Pop variation · I–IV–vi–V', ['I', 'IV', 'vi', 'V']),
+  progression('mediant', 'exploration', 'Mediant motion · I–iii–IV–V', ['I', 'iii', 'IV', 'V']),
+  progression('descending-fifths', 'exploration', 'Descending fifths · I–vi–ii–V', ['I', 'vi', 'ii', 'V']),
+  progression('extended-circle', 'exploration', 'Extended circle · iii–vi–ii–V–I', ['iii', 'vi', 'ii', 'V', 'I']),
+  progression('leading-tone', 'exploration', 'Leading-tone resolution · vii°–I', ['vii°', 'I']),
 ];
 
 export const progressionNamed = (id: string): Progression => {
