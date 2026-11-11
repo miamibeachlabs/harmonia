@@ -101,6 +101,8 @@ h2 { margin: 0; font-size: 1.2rem; font-weight: 650; letter-spacing: -.02em; }
 .chord-actions button { min-width: 22px; min-height: 22px; padding: 1px 4px; border-color: var(--line); border-radius: 4px; font-size: .72rem; font-weight: 800; line-height: 1; }
 .chord-actions .chord-action--remove { min-width: 26px; color: var(--coral); border-color: color-mix(in srgb, var(--coral) 42%, var(--line)); font-size: .9rem; }
 .chord-actions .chord-action--move { color: var(--muted); }
+.chord-actions .chord-action--quality { color: var(--muted); }
+.chord-actions .chord-action--quality.is-altered { color: var(--surface); background: var(--coral); border-color: var(--coral); }
 .chord-actions button:disabled { cursor: default; opacity: .3; }
 .chord-actions button:disabled:hover { background: transparent; }
 .clear { width: 100%; margin-top: 4px; }
