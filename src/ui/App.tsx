@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'preact/hooks';
 import { createChordPlayer } from '../audio/chordPlayer.ts';
-import { chordName, chordPitchClasses, degreeIn, harmonicFieldFor, keyCollectionLabel, keyCollectionNamed, keyCollections, pitchClassOf, thirdLinksIn, triadIn, type Degree, type DiatonicTriad, type HarmonicField } from '../domain/harmonicField.ts';
+import { chordFromTriad, chordName, chordNotes, chordPitchClasses, isMajorOrMinor, romanNumeral, toggledMajorMinor, type Chord } from '../domain/chords.ts';
+import { degreeIn, harmonicFieldFor, keyCollectionLabel, keyCollectionNamed, keyCollections, pitchClassOf, thirdLinksIn, triadIn, type Degree, type DiatonicTriad, type HarmonicField, type TriadQuality } from '../domain/harmonicField.ts';
 import { majorProgressions, progressionFamilies, progressionNamed, rotateBy, type ProgressionFamily } from '../domain/progressions.ts';
 import { canonicalVoicings, voicingRegister } from '../domain/voiceLeading.ts';
 import { sourceCircleLayout } from '../projections/circleOfThirds.ts';
@@ -14,18 +15,15 @@ const point = (field: HarmonicField, degree: Degree) => {
   return `${x},${y}`;
 };
 
-const chordPath = (field: HarmonicField, triad: DiatonicTriad) => triad.members.map(degree => point(field, degree)).join(' ');
-const chordNotes = (field: HarmonicField, triad: DiatonicTriad) => triad.members.map(degree => degreeIn(field, degree).note).join(' · ');
-const chordIdentity = (field: HarmonicField, triad: DiatonicTriad) => chordPitchClasses(field, triad).toSorted((a, b) => a - b).join(':');
+const chordPath = (field: HarmonicField, chord: Chord) => triadIn(field, chord.root).members.map(degree => point(field, degree)).join(' ');
 const nodeName = (note: string, quality: DiatonicTriad['quality']) => quality === 'minor' ? `${note}m` : note;
-const progressionName = (degrees: readonly Degree[]) => degrees.join('–');
+const progressionName = (chords: readonly Chord[]) => chords.map(romanNumeral).join('–');
 
 type DisplayedSequence = Readonly<{
   name: string;
   description?: string;
-  degrees: readonly Degree[];
-  triads: readonly DiatonicTriad[];
-  isEditable: boolean;
+  chords: readonly Chord[];
+  canReorder: boolean;
 }>;
 
 const arrowSegment = (field: HarmonicField, from: Degree, to: Degree) => {
@@ -56,8 +54,9 @@ const arrowSegment = (field: HarmonicField, from: Degree, to: Degree) => {
 export const App = () => {
   const [chordPlayer] = useState(createChordPlayer);
   const [collectionId, setCollectionId] = useState('C');
-  const [selectedChordIds, setSelectedChordIds] = useState<readonly string[]>([]);
+  const [selectedChords, setSelectedChords] = useState<readonly Chord[]>([]);
   const [progressionId, setProgressionId] = useState<string | null>('pop-axis');
+  const [progressionQualities, setProgressionQualities] = useState<readonly (TriadQuality | undefined)[]>([]);
   const [rotation, setRotation] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [playingStep, setPlayingStep] = useState<number | null>(null);
@@ -65,33 +64,28 @@ export const App = () => {
   const field = harmonicFieldFor(collection.major, 'natural');
   const thirdLinks = thirdLinksIn(field);
   const progression = progressionId ? progressionNamed(progressionId) : null;
-  const triadByIdentity = new Map(field.triads.map(triad => [chordIdentity(field, triad), triad]));
-  const selectedTriads = selectedChordIds.flatMap(identity => {
-    const triad = triadByIdentity.get(identity);
-    return triad ? [triad] : [];
-  });
-  const selectedDegrees = selectedTriads.map(triad => triad.root);
-  const progressionDegrees = progression ? rotateBy(progression.degrees, rotation) : [];
+  const overriddenProgressionChords = progression?.chords.map((chord, index) =>
+    progressionQualities[index] ? { ...chord, quality: progressionQualities[index] } : chord) ?? [];
+  const progressionChords = rotateBy(overriddenProgressionChords, rotation);
   const sequence: DisplayedSequence = progression
     ? {
-      name: progressionName(progressionDegrees),
+      name: progressionName(progressionChords),
       description: progression.description,
-      degrees: progressionDegrees,
-      triads: progressionDegrees.map(degree => triadIn(field, degree)),
-      isEditable: false,
+      chords: progressionChords,
+      canReorder: false,
     }
     : {
-      name: progressionName(selectedDegrees) || 'Free selection',
-      degrees: selectedDegrees,
-      triads: selectedTriads,
-      isEditable: true,
+      name: progressionName(selectedChords) || 'Free selection',
+      chords: selectedChords,
+      canReorder: true,
     };
-  const soundingChords = sequence.triads.map(triad => ({
-    rootPitchClass: pitchClassOf(degreeIn(field, triad.root).note),
-    pitchClasses: chordPitchClasses(field, triad),
+  const sequenceDegrees = sequence.chords.map(chord => chord.root);
+  const soundingChords = sequence.chords.map(chord => ({
+    rootPitchClass: pitchClassOf(degreeIn(field, chord.root).note),
+    pitchClasses: chordPitchClasses(field, chord),
   }));
   const voicedChords = canonicalVoicings(soundingChords);
-  const sequenceKey = sequence.degrees.join(':');
+  const sequenceKey = sequence.chords.map(chord => `${chord.root}:${chord.quality}`).join(':');
   const playbackContextKey = `${collectionId}|${sequenceKey}`;
 
   useEffect(() => () => chordPlayer.stop(), [chordPlayer]);
@@ -102,31 +96,22 @@ export const App = () => {
     setPlayingStep(null);
   }, [chordPlayer, playbackContextKey]);
 
-  useEffect(() => {
-    const available = new Set(field.triads.map(triad => chordIdentity(field, triad)));
-    setSelectedChordIds(selected => {
-      const retained = selected.filter(identity => available.has(identity));
-      return retained.length === selected.length ? selected : retained;
-    });
-  }, [field]);
-
   const selectCollection = (nextCollectionId: string) => {
     setCollectionId(nextCollectionId);
-    setSelectedChordIds([]);
+    setSelectedChords([]);
   };
 
   const addChord = (triad: DiatonicTriad) => {
     setProgressionId(null);
     setRotation(0);
-    const identity = chordIdentity(field, triad);
-    setSelectedChordIds(selected => [...selected, identity]);
+    setSelectedChords(selected => [...selected, chordFromTriad(triad)]);
   };
 
   const removeChord = (index: number) =>
-    setSelectedChordIds(selected => selected.filter((_, selectedIndex) => selectedIndex !== index));
+    setSelectedChords(selected => selected.filter((_, selectedIndex) => selectedIndex !== index));
 
   const moveChord = (from: number, to: number) =>
-    setSelectedChordIds(selected => {
+    setSelectedChords(selected => {
       if (to < 0 || to >= selected.length) return selected;
       const reordered = [...selected];
       const [chord] = reordered.splice(from, 1);
@@ -134,19 +119,35 @@ export const App = () => {
       return reordered;
     });
 
+  const toggleChordQuality = (index: number) => {
+    if (progression) {
+      setProgressionQualities(qualities => {
+        const sourceIndex = (rotation % progression.chords.length + progression.chords.length + index) % progression.chords.length;
+        const next = [...qualities];
+        next[sourceIndex] = toggledMajorMinor(progressionChords[index]).quality;
+        return next;
+      });
+      return;
+    }
+
+    setSelectedChords(selected => selected.map((chord, selectedIndex) =>
+      selectedIndex === index ? toggledMajorMinor(chord) : chord));
+  };
+
   const selectProgression = (id: string) => {
     setProgressionId(id || null);
     setRotation(0);
-    setSelectedChordIds([]);
+    setSelectedChords([]);
+    setProgressionQualities([]);
   };
 
   const rotateSequence = (direction: -1 | 1) => {
-    if (sequence.degrees.length < 2) return;
+    if (sequenceDegrees.length < 2) return;
     if (progression) {
       setRotation(current => current + direction);
       return;
     }
-    setSelectedChordIds(selected => rotateBy(selected, direction));
+    setSelectedChords(selected => rotateBy(selected, direction));
   };
 
   const togglePlayback = () => {
@@ -180,7 +181,7 @@ export const App = () => {
           <label>Progression
             <select value={progressionId ?? ''} onChange={event => selectProgression(event.currentTarget.value)}>
               <optgroup label="Free selection">
-                <option value="">{sequence.isEditable ? sequence.name : 'Empty — select your own'}</option>
+                <option value="">{sequence.canReorder ? sequence.name : 'Empty — select your own'}</option>
               </optgroup>
               {(Object.entries(progressionFamilies) as readonly [ProgressionFamily, string][]).map(([family, label]) => (
                 <optgroup label={label}>
@@ -212,8 +213,8 @@ export const App = () => {
                   y2={sourceCircleLayout[degreeIn(field, link.to).geometry].y}
                 />
               ))}
-              {sequence.degrees.slice(1).map((to, index) => {
-                const from = sequence.degrees[index];
+              {sequenceDegrees.slice(1).map((to, index) => {
+                const from = sequenceDegrees[index];
                 const segment = arrowSegment(field, from, to);
                 if (!segment) return null;
                 return <>
@@ -221,17 +222,17 @@ export const App = () => {
                   <polygon class="progression-arrowhead" points={segment.head} />
                 </>;
               })}
-              {sequence.triads.map(triad => {
-                const hue = rootHueClass(degreeIn(field, triad.root).note);
-                return <polygon class={`selection ${hue}`} points={chordPath(field, triad)} />;
+              {sequence.chords.map(chord => {
+                const hue = rootHueClass(degreeIn(field, chord.root).note);
+                return <polygon class={`selection ${hue}`} points={chordPath(field, chord)} />;
               })}
             </svg>
             {field.degrees.map(node => {
               const { x, y } = sourceCircleLayout[node.geometry];
               const triad = triadIn(field, node.degree);
-              const selected = sequence.triads.some(active => active.root === triad.root);
-              const playing = playingStep !== null && sequence.degrees[playingStep] === node.degree;
-              const steps = sequence.degrees.flatMap((degree, index) => degree === node.degree ? [index + 1] : []);
+              const selected = sequence.chords.some(active => active.root === triad.root);
+              const playing = playingStep !== null && sequenceDegrees[playingStep] === node.degree;
+              const steps = sequenceDegrees.flatMap((degree, index) => degree === node.degree ? [index + 1] : []);
               return (
                 <div class="degree-slot" style={{ left: `${x}%`, top: `${y}%` }}>
                   <button
@@ -262,30 +263,34 @@ export const App = () => {
             </div>
             <div class="rotation-controls" aria-label="Rotate progression">
               <span>Rotate</span>
-              <button class="rotate" aria-label="Rotate progression backward" disabled={sequence.degrees.length < 2} onClick={() => rotateSequence(-1)}>↶</button>
-              <button class="rotate" aria-label="Rotate progression forward" disabled={sequence.degrees.length < 2} onClick={() => rotateSequence(1)}>↷</button>
+              <button class="rotate" aria-label="Rotate progression backward" disabled={sequenceDegrees.length < 2} onClick={() => rotateSequence(-1)}>↶</button>
+              <button class="rotate" aria-label="Rotate progression forward" disabled={sequenceDegrees.length < 2} onClick={() => rotateSequence(1)}>↷</button>
             </div>
           </div>
           {sequence.description && <p class="progression-description">{sequence.description}</p>}
-          {sequence.triads.length ? (
+          {sequence.chords.length ? (
             <>
               <ul class="chord-list">
-                {sequence.triads.map((triad, index) => {
-                  const root = degreeIn(field, triad.root);
-                  const name = chordName(field, triad.root);
+                {sequence.chords.map((chord, index) => {
+                  const root = degreeIn(field, chord.root);
+                  const name = chordName(field, chord);
+                  const isDiatonic = chord.quality === triadIn(field, chord.root).quality;
                   return <li class={playingStep === index ? 'is-playing' : ''}>
                     <span class="progression-index">{index + 1}</span>
                     <ChordGlyph rootHue={rootHueClass(root.note)} midiNotes={voicedChords[index] ?? []} register={voicingRegister} label={`${name} in its played voicing`} />
                     <div class="chord-summary">
-                      <strong class="chord-degree">{triad.root}</strong>
+                      <strong class="chord-degree">{romanNumeral(chord)}</strong>
                       <span class="chord-relation">=</span>
                       <strong class="chord-name">{name}</strong>
-                      <span class="chord-notes">({chordNotes(field, triad)})</span>
+                      <span class="chord-notes">({chordNotes(field, chord).join(' · ')})</span>
                     </div>
-                    {sequence.isEditable && <span class="chord-actions" aria-label={`Edit ${name} at step ${index + 1}`}>
-                      <button class="chord-action--remove" aria-label={`Remove ${name}`} onClick={() => removeChord(index)}>×</button>
-                      <button class="chord-action--move" disabled={index === 0} aria-label={`Move ${name} earlier`} onClick={() => moveChord(index, index - 1)}>↑</button>
-                      <button class="chord-action--move" disabled={index === sequence.triads.length - 1} aria-label={`Move ${name} later`} onClick={() => moveChord(index, index + 1)}>↓</button>
+                    {(isMajorOrMinor(chord) || sequence.canReorder) && <span class="chord-actions" aria-label={`Edit ${name} at step ${index + 1}`}>
+                      {isMajorOrMinor(chord) && <button class={`chord-action--quality ${isDiatonic ? '' : 'is-altered'}`} aria-label={`Change ${name} to ${chord.quality === 'major' ? 'minor' : 'major'}`} onClick={() => toggleChordQuality(index)}>{chord.quality === 'major' ? 'm' : 'M'}</button>}
+                      {sequence.canReorder && <>
+                        <button class="chord-action--remove" aria-label={`Remove ${name}`} onClick={() => removeChord(index)}>×</button>
+                        <button class="chord-action--move" disabled={index === 0} aria-label={`Move ${name} earlier`} onClick={() => moveChord(index, index - 1)}>↑</button>
+                        <button class="chord-action--move" disabled={index === sequence.chords.length - 1} aria-label={`Move ${name} later`} onClick={() => moveChord(index, index + 1)}>↓</button>
+                      </>}
                     </span>}
                   </li>;
                 })}
@@ -293,7 +298,7 @@ export const App = () => {
               <button class="primary play-sequence" onClick={togglePlayback}>{isPlaying ? 'Stop' : 'Play'}</button>
             </>
           ) : <p>Choose roots in the circle to build a progression.</p>}
-          {sequence.isEditable && sequence.triads.length > 0 && <button class="clear" onClick={() => setSelectedChordIds([])}>Clear selection</button>}
+          {sequence.canReorder && sequence.chords.length > 0 && <button class="clear" onClick={() => setSelectedChords([])}>Clear selection</button>}
 
         </aside>
       </main>
@@ -305,18 +310,18 @@ export const App = () => {
             <h2 id="keyboard-title">Every octave</h2>
           </div>
         </div>
-        <PianoKeyboard chords={sequence.triads.map(triad => ({
-          rootHue: rootHueClass(degreeIn(field, triad.root).note),
-          quality: triad.quality,
-          pitchClasses: chordPitchClasses(field, triad),
+        <PianoKeyboard chords={sequence.chords.map(chord => ({
+          rootHue: rootHueClass(degreeIn(field, chord.root).note),
+          quality: chord.quality,
+          pitchClasses: chordPitchClasses(field, chord),
         }))} />
-        {sequence.triads.length > 0 && <ul class="keyboard-chord-list">
-          {sequence.triads.map((triad, index) => {
-            const root = degreeIn(field, triad.root);
-            return <li class={`${rootHueClass(root.note)} keyboard-chord-list--${triad.quality}`}>
+        {sequence.chords.length > 0 && <ul class="keyboard-chord-list">
+          {sequence.chords.map((chord, index) => {
+            const root = degreeIn(field, chord.root);
+            return <li class={`${rootHueClass(root.note)} keyboard-chord-list--${chord.quality}`}>
               <em>{index + 1}</em>
-              <strong>{chordName(field, triad.root)}</strong>
-              <span>{chordNotes(field, triad)}</span>
+              <strong>{chordName(field, chord)}</strong>
+              <span>{chordNotes(field, chord).join(' · ')}</span>
             </li>;
           })}
         </ul>}
