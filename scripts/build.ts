@@ -19,6 +19,7 @@ const staticFiles = [
   'icon.svg',
   'icon-192.png',
   'icon-512.png',
+  '_headers',
 ];
 
 for (const path of staticFiles)

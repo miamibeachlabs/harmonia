@@ -28,6 +28,6 @@ Local development does not retain a service worker or application caches. This k
 
 ## Offline contract
 
-The first online visit downloads the complete application. Later launches read the installed application from cache immediately and work in airplane mode. Registration checks for a changed service worker when connectivity exists. A build fingerprint changes the worker whenever an application file changes, and a new version activates only after its complete shell has downloaded and existing application windows have closed.
+The first online visit downloads the complete application. Later launches read the installed application from cache immediately and work in airplane mode. On launch, return to the foreground, and reconnection, the application checks for a changed service worker without consulting HTTP caches. A build fingerprint changes the worker whenever an application file changes. A new worker activates only after its complete shell has downloaded, takes control immediately, and reloads the application once into its new complete cache. The worker script itself is served with `Cache-Control: no-cache`.
 
 Application data belongs in browser storage and must remain usable without a network connection. Schema changes must migrate existing data without erasing it.
