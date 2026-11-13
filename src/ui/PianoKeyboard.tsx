@@ -1,19 +1,26 @@
-import type { TriadQuality } from '../domain/harmonicField.ts';
-
 type PianoKey = Readonly<{
   pitchClass: number;
   x: number;
   black: boolean;
 }>;
 
+export type KeyboardCollection = Readonly<{
+  notes: readonly Readonly<{ name: string; pitchClass: number }>[];
+  tonicPitchClass: number;
+  label: string;
+}>;
+
+export type KeyboardNote = KeyboardCollection['notes'][number];
+
 export type KeyboardChord = Readonly<{
   rootHue: string;
-  quality: TriadQuality;
   pitchClasses: readonly number[];
 }>;
 
 type PianoKeyboardProps = Readonly<{
-  chords: readonly KeyboardChord[];
+  collection: KeyboardCollection;
+  chord?: KeyboardChord;
+  progressionNotes?: readonly KeyboardNote[];
 }>;
 
 const blackKeyX: Readonly<Record<number, number>> = {
@@ -45,51 +52,46 @@ const keys = (): readonly PianoKey[] =>
 
 const keyboardKeys = keys();
 
-const dotY = (index: number, count: number, black: boolean) => {
-  const top = black ? .55 : .75;
-  const bottom = black ? 2.55 : 4.25;
-  return top + (bottom - top) * (index + 1) / (count + 1);
-};
-
-const dot = (chord: KeyboardChord, x: number, y: number, radius: number, onBlackKey: boolean) => {
-  const className = `piano-dot ${chord.rootHue} ${onBlackKey ? 'piano-dot--on-black' : ''}`;
-
-  if (chord.quality === 'major') {
-    return <rect class={className} x={x - radius} y={y - radius} width={radius * 2} height={radius * 2} rx=".03" />;
-  }
-
-  if (chord.quality === 'diminished') {
-    return <polygon class={className} points={`${x},${y - radius} ${x + radius},${y} ${x},${y + radius} ${x - radius},${y}`} />;
-  }
-
-  if (chord.quality === 'augmented') {
-    const half = radius * .86;
-    return <polygon class={className} points={`${x - half},${y - radius} ${x + half},${y - radius} ${x + radius},${y} ${x + half},${y + radius} ${x - half},${y + radius} ${x - radius},${y}`} />;
-  }
-
-  return <circle class={className} cx={x} cy={y} r={radius} />;
-};
-
-/** One C2–C5 keyboard holds every selected chord in a stable dot lane. */
-export const PianoKeyboard = ({ chords }: PianoKeyboardProps) => {
-  const contains = (key: PianoKey, chord: KeyboardChord) => chord.pitchClasses.includes(key.pitchClass);
+/** A fixed C2–C5 keyboard showing the active pitch collection and one chord lens. */
+export const PianoKeyboard = ({ collection, chord, progressionNotes = [] }: PianoKeyboardProps) => {
+  const noteAt = (key: PianoKey) => collection.notes.find(note => note.pitchClass === key.pitchClass);
+  const progressionNoteAt = (key: PianoKey) => progressionNotes.find(note => note.pitchClass === key.pitchClass);
+  const marker = (key: PianoKey) => {
+    const scaleNote = noteAt(key);
+    const progressionNote = progressionNoteAt(key);
+    const note = scaleNote ?? progressionNote;
+    if (!note) return null;
+    const tonic = key.pitchClass === collection.tonicPitchClass;
+    const className = `piano-scale-note ${tonic ? 'is-tonic' : ''} ${key.black ? 'piano-scale-note--on-black' : ''}`;
+    const x = key.x + (key.black ? .34 : .5);
+    const y = key.black ? 2.35 : 4.12;
+    const labelY = key.black ? 1.75 : 3.7;
+    return <>
+      <text class={`piano-note-label ${key.black ? 'piano-note-label--on-black' : ''} ${tonic ? 'is-tonic' : ''} ${progressionNote && !scaleNote ? 'is-progression-only' : ''}`} x={x} y={labelY}>{note.name}</text>
+      {progressionNote && <circle class={`piano-progression-ring ${key.black ? 'piano-progression-ring--on-black' : ''}`} cx={x} cy={y} r={tonic ? .31 : .23} />}
+      <circle class={scaleNote ? className : `piano-progression-note ${key.black ? 'piano-progression-note--on-black' : ''}`} cx={x} cy={y} r={tonic ? .24 : .16} />
+    </>;
+  };
+  const chordTone = (key: PianoKey) => {
+    if (!chord?.pitchClasses.includes(key.pitchClass)) return null;
+    return <rect class={`piano-chord-key ${chord.rootHue}`} x={key.x} y="0" width={key.black ? '.68' : '1'} height={key.black ? '3.15' : '5'} rx={key.black ? '.08' : undefined} />;
+  };
+  const chordToneSelected = (key: PianoKey) => Boolean(chord?.pitchClasses.includes(key.pitchClass));
 
   return (
-    <svg class="piano" viewBox="0 0 22 5" role="img" aria-label="Selected chord tones repeated from C2 through C5">
+    <svg class="piano" viewBox="0 0 22 5" role="img" aria-label={collection.label}>
       {keyboardKeys.filter(key => !key.black).map(key => (
-        <g class="piano-key piano-key--white">
+        <g class={`piano-key piano-key--white ${chordToneSelected(key) ? 'is-chord-tone' : ''}`}>
           <rect x={key.x} y="0" width="1" height="5" />
-          {chords.map((chord, index) => contains(key, chord) && (
-            dot(chord, key.x + .5, dotY(index, chords.length, false), .23, false)
-          ))}
+          {chordTone(key)}
+          {marker(key)}
         </g>
       ))}
       {keyboardKeys.filter(key => key.black).map(key => (
-        <g class="piano-key piano-key--black">
+        <g class={`piano-key piano-key--black ${chordToneSelected(key) ? 'is-chord-tone' : ''}`}>
           <rect x={key.x} y="0" width=".68" height="3.15" rx=".08" />
-          {chords.map((chord, index) => contains(key, chord) && (
-            dot(chord, key.x + .34, dotY(index, chords.length, true), .2, true)
-          ))}
+          {chordTone(key)}
+          {marker(key)}
         </g>
       ))}
     </svg>

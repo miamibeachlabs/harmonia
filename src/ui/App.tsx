@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'preact/hooks';
 import { createChordPlayer } from '../audio/chordPlayer.ts';
-import { chordFromTriad, chordName, chordNotes, chordPitchClasses, isMajorOrMinor, romanNumeral, toggledMajorMinor, type Chord } from '../domain/chords.ts';
-import { degreeIn, harmonicFieldFor, keyCollectionLabel, keyCollectionNamed, keyCollections, pitchClassOf, thirdLinksIn, triadIn, type Degree, type DiatonicTriad, type HarmonicField, type TriadQuality } from '../domain/harmonicField.ts';
+import { chordFromTriad, chordName, chordNotes, chordPitchClasses, chordRootNote, chordRootPitchClass, isMajorOrMinor, romanNumeral, toggledMajorMinor, type Chord } from '../domain/chords.ts';
+import { degreeIn, harmonicFieldFor, keyCollectionLabel, keyCollectionNamed, keyCollections, pitchClassOf, relativeHarmonicMinorFieldFor, thirdLinksIn, triadIn, type Degree, type DiatonicTriad, type HarmonicField, type MinorForm, type TriadQuality } from '../domain/harmonicField.ts';
 import { majorProgressions, progressionFamilies, progressionNamed, rotateBy, type ProgressionFamily } from '../domain/progressions.ts';
 import { canonicalVoicings, voicingRegister } from '../domain/voiceLeading.ts';
 import { sourceCircleLayout } from '../projections/circleOfThirds.ts';
@@ -16,8 +16,14 @@ const point = (field: HarmonicField, degree: Degree) => {
 };
 
 const chordPath = (field: HarmonicField, chord: Chord) => triadIn(field, chord.root).members.map(degree => point(field, degree)).join(' ');
-const nodeName = (note: string, quality: DiatonicTriad['quality']) => quality === 'minor' ? `${note}m` : note;
+const nodeName = (note: string, quality: DiatonicTriad['quality']) => ({
+  major: note,
+  minor: `${note}m`,
+  diminished: `${note}°`,
+  augmented: `${note}+`,
+})[quality];
 const progressionName = (chords: readonly Chord[]) => chords.map(romanNumeral).join('–');
+const chordIdentity = (chord: Chord) => `${chord.root}:${chord.quality}`;
 
 type DisplayedSequence = Readonly<{
   name: string;
@@ -25,6 +31,13 @@ type DisplayedSequence = Readonly<{
   chords: readonly Chord[];
   canReorder: boolean;
 }>;
+
+type KeyboardChordGroup = Readonly<{
+  label: string;
+  chords: readonly Chord[];
+}>;
+
+type KeyboardReading = 'major' | MinorForm;
 
 const arrowSegment = (field: HarmonicField, from: Degree, to: Degree) => {
   const start = sourceCircleLayout[degreeIn(field, from).geometry];
@@ -54,6 +67,8 @@ const arrowSegment = (field: HarmonicField, from: Degree, to: Degree) => {
 export const App = () => {
   const [chordPlayer] = useState(createChordPlayer);
   const [collectionId, setCollectionId] = useState('C');
+  const [keyboardReading, setKeyboardReading] = useState<KeyboardReading>('major');
+  const [keyboardChordId, setKeyboardChordId] = useState<string | null>(null);
   const [selectedChords, setSelectedChords] = useState<readonly Chord[]>([]);
   const [progressionId, setProgressionId] = useState<string | null>('pop-axis');
   const [progressionQualities, setProgressionQualities] = useState<readonly (TriadQuality | undefined)[]>([]);
@@ -61,9 +76,16 @@ export const App = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [playingStep, setPlayingStep] = useState<number | null>(null);
   const collection = keyCollectionNamed(collectionId);
-  const field = harmonicFieldFor(collection.major, 'natural');
-  const thirdLinks = thirdLinksIn(field);
   const progression = progressionId ? progressionNamed(progressionId) : null;
+  const referenceField = harmonicFieldFor(collection.major, 'natural');
+  const harmonicExploration = keyboardReading === 'harmonic' && !progression;
+  const field = harmonicExploration
+    ? relativeHarmonicMinorFieldFor(collection)
+    : referenceField;
+  const keyboardField = keyboardReading === 'major'
+    ? referenceField
+    : harmonicFieldFor(collection.relativeMinor, keyboardReading);
+  const thirdLinks = thirdLinksIn(field);
   const overriddenProgressionChords = progression?.chords.map((chord, index) =>
     progressionQualities[index] ? { ...chord, quality: progressionQualities[index] } : chord) ?? [];
   const progressionChords = rotateBy(overriddenProgressionChords, rotation);
@@ -81,12 +103,39 @@ export const App = () => {
     };
   const sequenceDegrees = sequence.chords.map(chord => chord.root);
   const soundingChords = sequence.chords.map(chord => ({
-    rootPitchClass: pitchClassOf(degreeIn(field, chord.root).note),
+    rootPitchClass: chordRootPitchClass(field, chord),
     pitchClasses: chordPitchClasses(field, chord),
   }));
   const voicedChords = canonicalVoicings(soundingChords);
-  const sequenceKey = sequence.chords.map(chord => `${chord.root}:${chord.quality}`).join(':');
-  const playbackContextKey = `${collectionId}|${sequenceKey}`;
+  const sequenceKey = sequence.chords.map(chordIdentity).join(':');
+  const playbackContextKey = `${collectionId}|${keyboardReading}|${sequenceKey}`;
+  const keyboardTonic = keyboardReading === 'major' ? collection.major.tonic : collection.relativeMinor.tonic;
+  const keyboardReadingLabel = keyboardReading === 'major'
+    ? `${collection.major.tonic} major`
+    : `${collection.relativeMinor.tonic} ${keyboardReading} minor`;
+  const keyboardCollection = {
+    notes: keyboardField.degrees.map(degree => ({
+      name: degree.note,
+      pitchClass: pitchClassOf(degree.note),
+    })),
+    tonicPitchClass: pitchClassOf(keyboardTonic),
+    label: `${keyboardReadingLabel} notes from C2 through C5`,
+  };
+  const circleChords = field.triads.map(chordFromTriad);
+  const progressionKeyboardChords = sequence.chords.filter((chord, index, chords) =>
+    chords.findIndex(candidate => chordIdentity(candidate) === chordIdentity(chord)) === index);
+  const vocabularyChords = circleChords.filter(circleChord =>
+    !progressionKeyboardChords.some(chord => chordIdentity(chord) === chordIdentity(circleChord)));
+  const keyboardChordGroups: readonly KeyboardChordGroup[] = [
+    ...(progressionKeyboardChords.length ? [{ label: 'Progression', chords: progressionKeyboardChords }] : []),
+    ...(vocabularyChords.length ? [{ label: 'Key vocabulary', chords: vocabularyChords }] : []),
+  ];
+  const keyboardChord = keyboardChordGroups.flatMap(group => group.chords)
+    .find(chord => chordIdentity(chord) === keyboardChordId) ?? null;
+  const progressionNotes = sequence.chords.flatMap(chord => chordNotes(field, chord)).map(name => ({
+    name,
+    pitchClass: pitchClassOf(name),
+  })).filter((note, index, notes) => notes.findIndex(candidate => candidate.pitchClass === note.pitchClass) === index);
 
   useEffect(() => () => chordPlayer.stop(), [chordPlayer]);
 
@@ -119,14 +168,14 @@ export const App = () => {
       setProgressionQualities(qualities => {
         const sourceIndex = (rotation % progression.chords.length + progression.chords.length + index) % progression.chords.length;
         const next = [...qualities];
-        next[sourceIndex] = toggledMajorMinor(progressionChords[index]).quality;
+        next[sourceIndex] = toggledMajorMinor(sequence.chords[index]).quality;
         return next;
       });
       return;
     }
 
     setSelectedChords(selected => selected.map((chord, selectedIndex) =>
-      selectedIndex === index ? toggledMajorMinor(chord) : chord));
+      selectedIndex === index ? toggledMajorMinor(sequence.chords[index]) : chord));
   };
 
   const selectProgression = (id: string) => {
@@ -134,6 +183,8 @@ export const App = () => {
     setRotation(0);
     setSelectedChords([]);
     setProgressionQualities([]);
+    setKeyboardReading('major');
+    setKeyboardChordId(null);
   };
 
   const rotateSequence = (direction: -1 | 1) => {
@@ -267,12 +318,12 @@ export const App = () => {
             <>
               <ul class="chord-list">
                 {sequence.chords.map((chord, index) => {
-                  const root = degreeIn(field, chord.root);
+                  const rootNote = chordRootNote(field, chord);
                   const name = chordName(field, chord);
                   const isDiatonic = chord.quality === triadIn(field, chord.root).quality;
                   return <li class={playingStep === index ? 'is-playing' : ''}>
                     <span class="progression-index">{index + 1}</span>
-                    <ChordGlyph rootHue={rootHueClass(root.note)} midiNotes={voicedChords[index] ?? []} register={voicingRegister} label={`${name} in its played voicing`} />
+                    <ChordGlyph rootHue={rootHueClass(rootNote)} midiNotes={voicedChords[index] ?? []} register={voicingRegister} label={`${name} in its played voicing`} />
                     <div class="chord-summary">
                       <strong class="chord-degree">{romanNumeral(chord)}</strong>
                       <span class="chord-relation">=</span>
@@ -301,25 +352,34 @@ export const App = () => {
       <section class="keyboard-lens surface" aria-labelledby="keyboard-title">
         <div class="section-heading">
           <div>
-            <p class="eyebrow">PIANO KEYBOARD</p>
-            <h2 id="keyboard-title">Every octave</h2>
+            <p class="eyebrow">KEY MAP</p>
+            <h2 id="keyboard-title">{keyboardReadingLabel}</h2>
+          </div>
+          <div class="keyboard-reading-controls" aria-label="Keyboard reading">
+            <button class={keyboardReading === 'major' ? 'is-selected' : ''} aria-pressed={keyboardReading === 'major'} onClick={() => setKeyboardReading('major')}>{collection.major.tonic}</button>
+            <button class={keyboardReading === 'natural' ? 'is-selected' : ''} aria-pressed={keyboardReading === 'natural'} onClick={() => setKeyboardReading('natural')}>{collection.relativeMinor.tonic}m</button>
+            <button class={keyboardReading === 'harmonic' ? 'is-selected' : ''} aria-pressed={keyboardReading === 'harmonic'} disabled={Boolean(progression)} onClick={() => setKeyboardReading('harmonic')}>{collection.relativeMinor.tonic}m harmonic</button>
           </div>
         </div>
-        <PianoKeyboard chords={sequence.chords.map(chord => ({
-          rootHue: rootHueClass(degreeIn(field, chord.root).note),
-          quality: chord.quality,
-          pitchClasses: chordPitchClasses(field, chord),
-        }))} />
-        {sequence.chords.length > 0 && <ul class="keyboard-chord-list">
-          {sequence.chords.map((chord, index) => {
-            const root = degreeIn(field, chord.root);
-            return <li class={`${rootHueClass(root.note)} keyboard-chord-list--${chord.quality}`}>
-              <em>{index + 1}</em>
-              <strong>{chordName(field, chord)}</strong>
-              <span>{chordNotes(field, chord).join(' · ')}</span>
-            </li>;
-          })}
-        </ul>}
+        <div class="keyboard-chord-groups" aria-label="Show chord tones on keyboard">
+          {keyboardChordGroups.map(group => <div class="keyboard-chord-group">
+            <p>{group.label}</p>
+            <div class="keyboard-chord-picker">
+              {group.chords.map(chord => {
+                const id = chordIdentity(chord);
+                const active = keyboardChordId === id;
+                const note = chordRootNote(field, chord);
+                return <button class={`${rootHueClass(note)} keyboard-chord-picker--${chord.quality} ${group.label === 'Progression' ? 'is-in-progression' : ''} ${active ? 'is-selected' : ''}`} aria-pressed={active} onClick={() => setKeyboardChordId(active ? null : id)}>
+                  <span>{chord.root}</span>{chordName(field, chord)}{group.label === 'Progression' && <i aria-hidden="true" />}
+                </button>;
+              })}
+            </div>
+          </div>)}
+        </div>
+        <PianoKeyboard collection={keyboardCollection} chord={keyboardChord ? {
+          rootHue: rootHueClass(chordRootNote(field, keyboardChord)),
+          pitchClasses: chordPitchClasses(field, keyboardChord),
+        } : undefined} progressionNotes={progressionNotes} />
       </section>
     </div>
   );

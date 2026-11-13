@@ -60,6 +60,10 @@ export const chordFromTriad = (triad: DiatonicTriad): Chord => chord(triad.root,
 
 export const chordWithQuality = (chord: Chord, quality: TriadQuality): Chord => ({ ...chord, quality });
 
+export const chordRootNote = (field: HarmonicField, chord: Chord) => degreeIn(field, chord.root).note;
+
+export const chordRootPitchClass = (field: HarmonicField, chord: Chord) => pitchClassOf(chordRootNote(field, chord));
+
 /** The conventional Roman numeral for a root and chosen triad quality. */
 export const romanNumeral = (chord: Chord) => {
   const stem = chord.root.replace(/[°+]/g, '');
@@ -67,15 +71,14 @@ export const romanNumeral = (chord: Chord) => {
   return `${letters}${numeralSuffix[chord.quality]}`;
 };
 
-export const chordName = (field: HarmonicField, chord: Chord) => `${degreeIn(field, chord.root).note}${chordSuffix[chord.quality]}`;
+export const chordName = (field: HarmonicField, chord: Chord) => `${chordRootNote(field, chord)}${chordSuffix[chord.quality]}`;
 
 /** Preserves staff-letter spelling while altering the chord tones when needed. */
 export const chordNotes = (field: HarmonicField, chord: Chord) => {
   const pitchClasses = memberPitchClasses(field, chord);
-  return memberDegrees(field, chord)
-  .map((degree, index) => {
-    const sourceNote = degreeIn(field, degree).note;
-    return `${sourceNote[0]}${accidentalFor(sourceNote[0], pitchClasses[index])}`;
+  const letters = memberDegrees(field, chord).map(degree => degreeIn(field, degree).note[0]);
+  return letters.map((letter, index) => {
+    return `${letter}${accidentalFor(letter, pitchClasses[index])}`;
   });
 };
 

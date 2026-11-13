@@ -79,6 +79,13 @@ const harmonicMinorPattern: FieldPattern = {
   geometry: ['vi', 'vii°', 'I', 'ii', 'iii', 'IV', 'V'],
 };
 
+/** Harmonic relative minor expressed in the fixed major-circle coordinates. */
+const relativeHarmonicMinorPattern: FieldPattern = {
+  degrees: ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'vii°'],
+  qualities: ['augmented', 'minor', 'major', 'major', 'diminished', 'minor', 'diminished'],
+  geometry: ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'vii°'],
+};
+
 const fieldFrom = (
   tonic: string,
   mode: KeyMode,
@@ -185,6 +192,17 @@ export const harmonicFieldFor = (choice: KeyChoice, minorForm: MinorForm): Harmo
 
   const notes = minorForm === 'harmonic' ? choice.harmonicNotes : choice.naturalNotes;
   return fieldFrom(choice.tonic, 'minor', notes ?? choice.naturalNotes, minorForm === 'harmonic' ? harmonicMinorPattern : naturalMinorPattern, minorForm);
+};
+
+/**
+ * Keeps the major circle's degree names and positions while showing the
+ * altered notes and triads of its relative harmonic minor.
+ */
+export const relativeHarmonicMinorFieldFor = (collection: KeyCollection): HarmonicField => {
+  const minor = collection.relativeMinor;
+  const relativeNotes = minor.harmonicNotes ?? minor.naturalNotes;
+  const majorCoordinateNotes = [...relativeNotes.slice(2), ...relativeNotes.slice(0, 2)];
+  return fieldFrom(minor.tonic, 'minor', majorCoordinateNotes, relativeHarmonicMinorPattern, 'harmonic');
 };
 
 export const degreeIn = (field: HarmonicField, degree: Degree): DegreeInField => {
