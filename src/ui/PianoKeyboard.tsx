@@ -57,9 +57,8 @@ export const PianoKeyboard = ({ collection, chord, progressionNotes = [] }: Pian
   const noteAt = (key: PianoKey) => collection.notes.find(note => note.pitchClass === key.pitchClass);
   const progressionNoteAt = (key: PianoKey) => progressionNotes.find(note => note.pitchClass === key.pitchClass);
   const marker = (key: PianoKey) => {
-    const scaleNote = noteAt(key);
+    const note = noteAt(key);
     const progressionNote = progressionNoteAt(key);
-    const note = scaleNote ?? progressionNote;
     if (!note) return null;
     const tonic = key.pitchClass === collection.tonicPitchClass;
     const className = `piano-scale-note ${tonic ? 'is-tonic' : ''} ${key.black ? 'piano-scale-note--on-black' : ''}`;
@@ -67,9 +66,9 @@ export const PianoKeyboard = ({ collection, chord, progressionNotes = [] }: Pian
     const y = key.black ? 2.35 : 4.12;
     const labelY = key.black ? 1.75 : 3.7;
     return <>
-      <text class={`piano-note-label ${key.black ? 'piano-note-label--on-black' : ''} ${tonic ? 'is-tonic' : ''} ${progressionNote && !scaleNote ? 'is-progression-only' : ''}`} x={x} y={labelY}>{note.name}</text>
+      <text class={`piano-note-label ${key.black ? 'piano-note-label--on-black' : ''} ${tonic ? 'is-tonic' : ''}`} x={x} y={labelY}>{note.name}</text>
       {progressionNote && <circle class={`piano-progression-ring ${key.black ? 'piano-progression-ring--on-black' : ''}`} cx={x} cy={y} r={tonic ? .31 : .23} />}
-      <circle class={scaleNote ? className : `piano-progression-note ${key.black ? 'piano-progression-note--on-black' : ''}`} cx={x} cy={y} r={tonic ? .24 : .16} />
+      <circle class={className} cx={x} cy={y} r={tonic ? .24 : .16} />
     </>;
   };
   const chordTone = (key: PianoKey) => {
