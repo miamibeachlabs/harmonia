@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'preact/hooks';
-import { createChordPlayer } from '../audio/chordPlayer.ts';
+import { useEffect, useRef, useState } from 'preact/hooks';
+import { createChordPlayer, type PlaybackSettings } from '../audio/chordPlayer.ts';
 import { chordFromTriad, chordName, chordNotes, chordPitchClasses, chordRootNote, chordRootPitchClass, isMajorOrMinor, romanNumeral, toggledMajorMinor, type Chord } from '../domain/chords.ts';
 import { degreeIn, harmonicFieldFor, keyCollectionLabel, keyCollectionNamed, keyCollections, pitchClassOf, relativeHarmonicMinorFieldFor, thirdLinksIn, triadIn, type Degree, type DiatonicTriad, type HarmonicField, type MinorForm, type TriadQuality } from '../domain/harmonicField.ts';
 import { majorProgressions, progressionFamilies, progressionNamed, rotateBy, type ProgressionFamily } from '../domain/progressions.ts';
@@ -9,6 +9,8 @@ import { ChordGlyph } from './ChordGlyph.tsx';
 import { MiamiBeachLabsBrand } from './MiamiBeachLabsBrand.tsx';
 import { PianoKeyboard } from './PianoKeyboard.tsx';
 import { rootHueClass } from './rootHue.ts';
+
+const defaultPlayback: PlaybackSettings = { tempo: 100, beatsPerChord: 4 };
 
 const point = (field: HarmonicField, degree: Degree) => {
   const { x, y } = sourceCircleLayout[degreeIn(field, degree).geometry];
@@ -75,6 +77,8 @@ export const App = () => {
   const [rotation, setRotation] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [playingStep, setPlayingStep] = useState<number | null>(null);
+  const [playback, setPlayback] = useState(defaultPlayback);
+  const playbackRef = useRef(playback);
   const collection = keyCollectionNamed(collectionId);
   const progression = progressionId ? progressionNamed(progressionId) : null;
   const referenceField = harmonicFieldFor(collection.major, 'natural');
@@ -138,6 +142,10 @@ export const App = () => {
   })).filter((note, index, notes) => notes.findIndex(candidate => candidate.pitchClass === note.pitchClass) === index);
 
   useEffect(() => () => chordPlayer.stop(), [chordPlayer]);
+
+  useEffect(() => {
+    playbackRef.current = playback;
+  }, [playback]);
 
   useEffect(() => {
     chordPlayer.stop();
@@ -205,7 +213,7 @@ export const App = () => {
     }
 
     setIsPlaying(true);
-    void chordPlayer.playLoop(soundingChords, setPlayingStep).catch(() => {
+    void chordPlayer.playLoop(soundingChords, () => playbackRef.current, setPlayingStep).catch(() => {
       setIsPlaying(false);
       setPlayingStep(null);
     });
@@ -341,6 +349,27 @@ export const App = () => {
                   </li>;
                 })}
               </ul>
+              <div class="playback-controls" aria-label="Playback settings">
+                <label>Tempo
+                  <input
+                    type="range"
+                    min="40"
+                    max="180"
+                    step="5"
+                    value={playback.tempo}
+                    onInput={event => setPlayback(current => ({ ...current, tempo: Number(event.currentTarget.value) }))}
+                  />
+                  <output>{playback.tempo}{'\u00a0'}BPM</output>
+                </label>
+                <div class="beats-per-chord" aria-label="Beats per chord">
+                  <span>Beats</span>
+                  {([3, 4] as const).map(beats => <button
+                    class={playback.beatsPerChord === beats ? 'is-selected' : ''}
+                    aria-pressed={playback.beatsPerChord === beats}
+                    onClick={() => setPlayback(current => ({ ...current, beatsPerChord: beats }))}
+                  >{beats}</button>)}
+                </div>
+              </div>
               <button class="primary play-sequence" onClick={togglePlayback}>{isPlaying ? 'Stop' : 'Play'}</button>
             </>
           ) : <p>Choose roots in the circle to build a progression.</p>}

@@ -2,10 +2,16 @@ import { canonicalVoicings, type SoundingChord } from '../domain/voiceLeading.ts
 
 export type { SoundingChord } from '../domain/voiceLeading.ts';
 
-const beatsPerChord = 4;
-const beatLength = 0.48;
-const barLength = beatsPerChord * beatLength;
 const bassRegister = 36; // C2
+
+export type PlaybackSettings = Readonly<{
+  tempo: number;
+  beatsPerChord: 3 | 4;
+}>;
+
+export type PlaybackSettingsSource = () => PlaybackSettings;
+
+const secondsPerBeat = (tempo: number) => 60 / tempo;
 
 type AudioOutput = Readonly<{
   context: AudioContext;
@@ -77,7 +83,7 @@ export const createChordPlayer = () => {
     activeOscillators.clear();
   };
 
-  const playNote = (midi: number, when: number, voice: 'chord' | 'bass', duration = beatLength) => {
+  const playNote = (midi: number, when: number, voice: 'chord' | 'bass', duration: number) => {
     const destination = output;
     if (!destination) return;
 
@@ -117,7 +123,11 @@ export const createChordPlayer = () => {
   };
 
   return {
-    async playLoop(chords: readonly SoundingChord[], onStep: (index: number) => void) {
+    async playLoop(
+      chords: readonly SoundingChord[],
+      settings: PlaybackSettingsSource,
+      onStep: (index: number) => void,
+    ) {
       if (!chords.length) return;
 
       output ??= audioOutput();
@@ -126,31 +136,32 @@ export const createChordPlayer = () => {
 
       const generation = playbackGeneration;
       const voicings = canonicalVoicings(chords);
-      const cycleLength = chords.length * barLength;
-
-      const scheduleCycle = (cycleStart: number) => {
+      const scheduleChord = (step: number, chordStart: number) => {
         const destination = output;
         if (generation !== playbackGeneration || !destination) return;
 
-        voicings.forEach((voicing, chordIndex) => {
-          const bass = bassRegister + chords[chordIndex].rootPitchClass;
-          const barStart = cycleStart + chordIndex * barLength;
-          playNote(bass, barStart, 'bass', barLength);
-          schedule((barStart - destination.context.currentTime) * 1_000, () => {
-            if (generation === playbackGeneration) onStep(chordIndex);
-          });
+        const current = settings();
+        const beatLength = secondsPerBeat(current.tempo);
+        const chordLength = current.beatsPerChord * beatLength;
+        const chordIndex = step % chords.length;
+        const voicing = voicings[chordIndex];
+        const bass = bassRegister + chords[chordIndex].rootPitchClass;
 
-          for (let beat = 0; beat < beatsPerChord; beat += 1) {
-            const when = barStart + beat * beatLength;
-            voicing.forEach(midi => playNote(midi, when, 'chord'));
-          }
+        playNote(bass, chordStart, 'bass', chordLength);
+        schedule((chordStart - destination.context.currentTime) * 1_000, () => {
+          if (generation === playbackGeneration) onStep(chordIndex);
         });
 
-        const nextCycleAt = cycleStart + cycleLength;
-        schedule((nextCycleAt - destination.context.currentTime - 0.04) * 1_000, () => scheduleCycle(nextCycleAt));
+        for (let beat = 0; beat < current.beatsPerChord; beat += 1) {
+          const when = chordStart + beat * beatLength;
+          voicing.forEach(midi => playNote(midi, when, 'chord', beatLength));
+        }
+
+        const nextChordAt = chordStart + chordLength;
+        schedule((nextChordAt - destination.context.currentTime - 0.04) * 1_000, () => scheduleChord(step + 1, nextChordAt));
       };
 
-      scheduleCycle(output.context.currentTime + 0.04);
+      scheduleChord(0, output.context.currentTime + 0.04);
     },
     stop,
   };
