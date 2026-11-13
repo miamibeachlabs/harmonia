@@ -6,7 +6,7 @@ const bassRegister = 36; // C2
 
 export type PlaybackSettings = Readonly<{
   tempo: number;
-  beatsPerChord: 3 | 4;
+  beatsPerChord: 2 | 3 | 4;
 }>;
 
 export type PlaybackSettingsSource = () => PlaybackSettings;
