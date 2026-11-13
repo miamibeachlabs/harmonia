@@ -96,11 +96,6 @@ export const App = () => {
     setPlayingStep(null);
   }, [chordPlayer, playbackContextKey]);
 
-  const selectCollection = (nextCollectionId: string) => {
-    setCollectionId(nextCollectionId);
-    setSelectedChords([]);
-  };
-
   const addChord = (triad: DiatonicTriad) => {
     setProgressionId(null);
     setRotation(0);
@@ -174,7 +169,7 @@ export const App = () => {
         </div>
         <div class="view-controls">
           <label>Key
-            <select value={collectionId} onChange={event => selectCollection(event.currentTarget.value)}>
+            <select value={collectionId} onChange={event => setCollectionId(event.currentTarget.value)}>
               {keyCollections.map(option => <option value={option.id}>{keyCollectionLabel(option)}</option>)}
             </select>
           </label>
