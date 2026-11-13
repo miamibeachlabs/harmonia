@@ -107,18 +107,44 @@ h2 { margin: 0; font-size: 1.2rem; font-weight: 650; letter-spacing: -.02em; }
 .chord-actions button:disabled:hover { background: transparent; }
 .clear { width: 100%; margin-top: 4px; }
 .play-sequence { width: 100%; margin-top: 14px; }
+.keyboard-lens .section-heading { justify-content: space-between; gap: 16px; }
+.keyboard-reading-controls { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px; }
+.keyboard-reading-controls button { min-height: 30px; padding: 4px 8px; border-color: var(--line); border-radius: 5px; color: var(--muted); font-size: .75rem; font-weight: 750; }
+.keyboard-reading-controls button.is-selected { color: var(--surface); background: var(--turquoise); border-color: var(--turquoise); }
+.keyboard-reading-controls button:disabled { cursor: not-allowed; opacity: .35; }
+.keyboard-chord-groups { display: grid; gap: 10px; margin-top: 18px; }
+.keyboard-chord-group { display: grid; gap: 4px; }
+.keyboard-chord-group p { margin: 0; color: var(--muted); font-size: .62rem; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; }
+.keyboard-chord-picker { display: flex; flex-wrap: wrap; gap: 5px; }
+.keyboard-chord-picker button { display: inline-flex; align-items: baseline; gap: 3px; min-height: 30px; padding: 3px 7px; color: var(--ink); border-color: color-mix(in srgb, var(--root-color) 50%, var(--line)); border-radius: 5px; font-size: .78rem; font-weight: 800; }
+.keyboard-chord-picker button:hover { background: color-mix(in srgb, var(--root-color) 14%, var(--surface)); }
+.keyboard-chord-picker button.is-selected { color: var(--ink); background: var(--root-color); border-color: var(--root-color); }
+.keyboard-chord-picker button span { color: var(--muted); font-family: Georgia, serif; font-size: .8em; }
+.keyboard-chord-picker button.is-selected span { color: color-mix(in srgb, var(--ink) 70%, var(--surface)); }
+.keyboard-chord-picker button.is-in-progression { font-weight: 900; }
+.keyboard-chord-picker button i { width: 6px; height: 6px; background: var(--ocean); border-radius: 50%; }
+.keyboard-chord-picker button.is-selected i { background: var(--surface); }
 .keyboard-lens .piano { margin-top: 20px; }
 .piano { display: block; width: 100%; height: auto; overflow: visible; }
 .piano-key--white rect { fill: var(--surface); stroke: var(--ink); stroke-width: .08; }
 .piano-key--black rect { fill: var(--ink); }
-.piano .piano-dot { fill: var(--root-color); stroke: var(--ink); stroke-width: .07; }
-.piano .piano-dot--on-black { stroke: var(--surface); }
-.keyboard-chord-list { display: flex; flex-wrap: wrap; gap: 8px 18px; padding: 0; margin: 0; list-style: none; }
-.keyboard-chord-list li { display: inline-flex; align-items: baseline; gap: 5px; }
-.keyboard-chord-list em { display: inline-grid; place-items: center; width: 16px; height: 16px; color: var(--surface); background: var(--ink); border-radius: 50%; font-size: .65rem; font-style: normal; font-weight: 800; }
-.keyboard-chord-list li::before { width: 10px; height: 10px; content: ''; border: 1px solid var(--ink); border-radius: 50%; }
-.keyboard-chord-list strong { font-size: .9rem; }
-.keyboard-chord-list span { color: var(--muted); font-size: .85rem; }
+.piano .piano-scale-note { fill: var(--seafoam); stroke: var(--ocean); stroke-width: .07; }
+.piano .piano-scale-note--on-black { stroke: var(--surface); }
+.piano .piano-scale-note.is-tonic { fill: var(--coral); stroke: var(--ink); stroke-width: .1; }
+.piano .piano-progression-ring { fill: none; stroke: var(--ocean); stroke-width: .07; }
+.piano .piano-progression-ring--on-black { stroke: var(--seafoam); }
+.piano .piano-progression-note { fill: var(--coral); stroke: var(--ink); stroke-width: .07; }
+.piano .piano-progression-note--on-black { stroke: var(--surface); }
+.piano .piano-note-label { fill: var(--muted); font-size: .34px; font-weight: 800; text-anchor: middle; }
+.piano .piano-note-label--on-black { fill: var(--surface); }
+.piano .piano-note-label.is-tonic { fill: var(--coral); }
+.piano .piano-note-label.is-progression-only { fill: var(--coral); }
+.piano .piano-chord-key { fill: var(--root-color); opacity: .58; }
+.piano-key--black .piano-chord-key { opacity: .82; }
+.piano .piano-key.is-chord-tone .piano-note-label { fill: var(--ink); }
+.piano .piano-key.is-chord-tone .piano-note-label--on-black { fill: var(--surface); }
+.piano .piano-key.is-chord-tone .piano-note-label.is-tonic { fill: var(--surface); }
+.piano .piano-key.is-chord-tone .piano-scale-note { fill: var(--surface); stroke: var(--ink); }
 .root-hue-0 { --root-color: var(--root-hue-0); }
 .root-hue-1 { --root-color: var(--root-hue-1); }
 .root-hue-2 { --root-color: var(--root-hue-2); }
@@ -132,17 +158,12 @@ h2 { margin: 0; font-size: 1.2rem; font-weight: 650; letter-spacing: -.02em; }
 .root-hue-10 { --root-color: var(--root-hue-10); }
 .root-hue-11 { --root-color: var(--root-hue-11); }
 .degree-node.root-hue-0, .degree-node.root-hue-1, .degree-node.root-hue-2, .degree-node.root-hue-3, .degree-node.root-hue-4, .degree-node.root-hue-5, .degree-node.root-hue-6, .degree-node.root-hue-7, .degree-node.root-hue-8, .degree-node.root-hue-9, .degree-node.root-hue-10, .degree-node.root-hue-11 { color: var(--ink); background: var(--root-color); }
-.keyboard-chord-list li::before { background: var(--root-color); }
-.keyboard-chord-list--major::before { border-radius: 1px; }
-.keyboard-chord-list--minor::before { border-radius: 50%; }
-.keyboard-chord-list--diminished::before { border-radius: 0; transform: rotate(45deg); }
-.keyboard-chord-list--augmented::before { border-radius: 0; clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%); }
-
 @media (max-width: 520px) {
   .workspace { padding: 28px 16px; }
   .masthead { align-items: flex-start; flex-wrap: wrap; }
   .study { display: block; }
   .section-heading { display: block; }
+  .keyboard-reading-controls { justify-content: flex-start; margin-top: 12px; }
   .reading { margin-top: 20px; }
   .degree-slot { width: 44px; height: 44px; }
   .degree-node .note { font-size: 1.35rem; }
