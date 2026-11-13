@@ -133,12 +133,9 @@ h2 { margin: 0; font-size: 1.2rem; font-weight: 650; letter-spacing: -.02em; }
 .piano .piano-scale-note.is-tonic { fill: var(--coral); stroke: var(--ink); stroke-width: .1; }
 .piano .piano-progression-ring { fill: none; stroke: var(--ocean); stroke-width: .07; }
 .piano .piano-progression-ring--on-black { stroke: var(--seafoam); }
-.piano .piano-progression-note { fill: var(--coral); stroke: var(--ink); stroke-width: .07; }
-.piano .piano-progression-note--on-black { stroke: var(--surface); }
 .piano .piano-note-label { fill: var(--muted); font-size: .34px; font-weight: 800; text-anchor: middle; }
 .piano .piano-note-label--on-black { fill: var(--surface); }
 .piano .piano-note-label.is-tonic { fill: var(--coral); }
-.piano .piano-note-label.is-progression-only { fill: var(--coral); }
 .piano .piano-chord-key { fill: var(--root-color); opacity: .58; }
 .piano-key--black .piano-chord-key { opacity: .82; }
 .piano .piano-key.is-chord-tone .piano-note-label { fill: var(--ink); }
