@@ -363,7 +363,7 @@ export const App = () => {
                 </label>
                 <div class="beats-per-chord" aria-label="Beats per chord">
                   <span>Beats</span>
-                  {([3, 4] as const).map(beats => <button
+                  {([2, 3, 4] as const).map(beats => <button
                     class={playback.beatsPerChord === beats ? 'is-selected' : ''}
                     aria-pressed={playback.beatsPerChord === beats}
                     onClick={() => setPlayback(current => ({ ...current, beatsPerChord: beats }))}
