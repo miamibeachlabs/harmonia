@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { createChordPlayer, type PlaybackSettings } from '../audio/chordPlayer.ts';
 import { chordFromTriad, chordName, chordNotes, chordPitchClasses, chordRootNote, chordRootPitchClass, isMajorOrMinor, romanNumeral, toggledMajorMinor, type Chord } from '../domain/chords.ts';
-import { degreeIn, harmonicFieldFor, keyCollectionLabel, keyCollectionNamed, keyCollections, pitchClassOf, relativeHarmonicMinorFieldFor, thirdLinksIn, triadIn, type Degree, type DiatonicTriad, type HarmonicField, type MinorForm, type TriadQuality } from '../domain/harmonicField.ts';
+import { degreeIn, harmonicFieldFor, keyCollectionLabel, keyCollectionNamed, keyCollections, pitchClassOf, relativeHarmonicMinorFieldFor, thirdLinksIn, triadIn, type Degree, type DiatonicTriad, type HarmonicField, type MinorForm } from '../domain/harmonicField.ts';
 import { majorProgressions, progressionFamilies, progressionNamed, rotateBy, type ProgressionFamily } from '../domain/progressions.ts';
 import { canonicalVoicings, voicingRegister } from '../domain/voiceLeading.ts';
 import { sourceCircleLayout } from '../projections/circleOfThirds.ts';
@@ -73,8 +73,6 @@ export const App = () => {
   const [keyboardChordId, setKeyboardChordId] = useState<string | null>(null);
   const [selectedChords, setSelectedChords] = useState<readonly Chord[]>([]);
   const [progressionId, setProgressionId] = useState<string | null>('pop-axis');
-  const [progressionQualities, setProgressionQualities] = useState<readonly (TriadQuality | undefined)[]>([]);
-  const [rotation, setRotation] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [playingStep, setPlayingStep] = useState<number | null>(null);
   const [playback, setPlayback] = useState(defaultPlayback);
@@ -90,9 +88,7 @@ export const App = () => {
     ? referenceField
     : harmonicFieldFor(collection.relativeMinor, keyboardReading);
   const thirdLinks = thirdLinksIn(field);
-  const overriddenProgressionChords = progression?.chords.map((chord, index) =>
-    progressionQualities[index] ? { ...chord, quality: progressionQualities[index] } : chord) ?? [];
-  const progressionChords = rotateBy(overriddenProgressionChords, rotation);
+  const progressionChords = progression?.chords ?? [];
   const sequence: DisplayedSequence = progression
     ? {
       name: progressionName(progressionChords),
@@ -155,12 +151,18 @@ export const App = () => {
 
   const addChord = (triad: DiatonicTriad) => {
     setProgressionId(null);
-    setRotation(0);
     setSelectedChords(selected => [...selected, chordFromTriad(triad)]);
   };
 
   const removeChord = (index: number) =>
     setSelectedChords(selected => selected.filter((_, selectedIndex) => selectedIndex !== index));
+
+  const duplicateChord = (index: number) =>
+    setSelectedChords(selected => [
+      ...selected.slice(0, index + 1),
+      selected[index],
+      ...selected.slice(index + 1),
+    ]);
 
   const moveChord = (from: number, to: number) =>
     setSelectedChords(selected => {
@@ -172,35 +174,25 @@ export const App = () => {
     });
 
   const toggleChordQuality = (index: number) => {
-    if (progression) {
-      setProgressionQualities(qualities => {
-        const sourceIndex = (rotation % progression.chords.length + progression.chords.length + index) % progression.chords.length;
-        const next = [...qualities];
-        next[sourceIndex] = toggledMajorMinor(sequence.chords[index]).quality;
-        return next;
-      });
-      return;
-    }
-
     setSelectedChords(selected => selected.map((chord, selectedIndex) =>
       selectedIndex === index ? toggledMajorMinor(sequence.chords[index]) : chord));
   };
 
   const selectProgression = (id: string) => {
     setProgressionId(id || null);
-    setRotation(0);
     setSelectedChords([]);
-    setProgressionQualities([]);
     setKeyboardReading('major');
     setKeyboardChordId(null);
   };
 
+  const editProgression = () => {
+    if (!progression) return;
+    setSelectedChords(sequence.chords);
+    setProgressionId(null);
+  };
+
   const rotateSequence = (direction: -1 | 1) => {
     if (sequenceDegrees.length < 2) return;
-    if (progression) {
-      setRotation(current => current + direction);
-      return;
-    }
     setSelectedChords(selected => rotateBy(selected, direction));
   };
 
@@ -315,11 +307,13 @@ export const App = () => {
               <p class="eyebrow">PROGRESSION</p>
               <h2 id="reading-title">{sequence.name}</h2>
             </div>
-            <div class="rotation-controls" aria-label="Rotate progression">
-              <span>Rotate</span>
-              <button class="rotate" aria-label="Rotate progression backward" disabled={sequenceDegrees.length < 2} onClick={() => rotateSequence(-1)}>↶</button>
-              <button class="rotate" aria-label="Rotate progression forward" disabled={sequenceDegrees.length < 2} onClick={() => rotateSequence(1)}>↷</button>
-            </div>
+            {progression
+              ? <button class="edit-progression" onClick={editProgression}>Edit</button>
+              : <div class="rotation-controls" aria-label="Rotate progression">
+                <span>Rotate</span>
+                <button class="rotate" aria-label="Rotate progression backward" disabled={sequenceDegrees.length < 2} onClick={() => rotateSequence(-1)}>↶</button>
+                <button class="rotate" aria-label="Rotate progression forward" disabled={sequenceDegrees.length < 2} onClick={() => rotateSequence(1)}>↷</button>
+              </div>}
           </div>
           {sequence.description && <p class="progression-description">{sequence.description}</p>}
           {sequence.chords.length ? (
@@ -336,16 +330,19 @@ export const App = () => {
                       <strong class="chord-degree">{romanNumeral(chord)}</strong>
                       <span class="chord-relation">=</span>
                       <strong class="chord-name">{name}</strong>
+                      {sequence.canReorder && isMajorOrMinor(chord) && <button class={`chord-action--quality ${isDiatonic ? '' : 'is-altered'}`} aria-label={`Change ${name} to ${chord.quality === 'major' ? 'minor' : 'major'}`} onClick={() => toggleChordQuality(index)}>{chord.quality === 'major' ? 'm' : 'M'}</button>}
                       <span class="chord-notes">({chordNotes(field, chord).join(' · ')})</span>
                     </div>
-                    {(isMajorOrMinor(chord) || sequence.canReorder) && <span class="chord-actions" aria-label={`Edit ${name} at step ${index + 1}`}>
-                      {isMajorOrMinor(chord) && <button class={`chord-action--quality ${isDiatonic ? '' : 'is-altered'}`} aria-label={`Change ${name} to ${chord.quality === 'major' ? 'minor' : 'major'}`} onClick={() => toggleChordQuality(index)}>{chord.quality === 'major' ? 'm' : 'M'}</button>}
-                      {sequence.canReorder && <>
+                    {sequence.canReorder && <>
+                      <span class="chord-actions" aria-label={`Remove ${name} at step ${index + 1}`}>
                         <button class="chord-action--remove" aria-label={`Remove ${name}`} onClick={() => removeChord(index)}>×</button>
+                      </span>
+                      <span class="sequence-actions" aria-label={`Reorder ${name} at step ${index + 1}`}>
+                        <button class="chord-action--duplicate" aria-label={`Duplicate ${name} after step ${index + 1}`} onClick={() => duplicateChord(index)}>+</button>
                         <button class="chord-action--move" disabled={index === 0} aria-label={`Move ${name} earlier`} onClick={() => moveChord(index, index - 1)}>↑</button>
                         <button class="chord-action--move" disabled={index === sequence.chords.length - 1} aria-label={`Move ${name} later`} onClick={() => moveChord(index, index + 1)}>↓</button>
-                      </>}
-                    </span>}
+                      </span>
+                    </>}
                   </li>;
                 })}
               </ul>

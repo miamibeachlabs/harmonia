@@ -83,9 +83,10 @@ h2 { margin: 0; font-size: 1.2rem; font-weight: 650; letter-spacing: -.02em; }
 .reading-heading { display: flex; align-items: end; justify-content: space-between; gap: 12px; }
 .progression-description { margin: 10px 0 0; color: var(--muted); font-size: .9rem; line-height: 1.5; }
 .rotation-controls { display: flex; align-items: center; gap: 4px; color: var(--muted); font-size: .7rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.edit-progression { min-height: 30px; padding: 4px 9px; color: var(--turquoise); border-color: color-mix(in srgb, var(--turquoise) 42%, var(--line)); border-radius: 5px; font-size: .75rem; font-weight: 800; }
 .rotate { display: grid; place-items: center; width: 34px; min-width: 34px; min-height: 34px; padding: 0; color: var(--turquoise); border-color: color-mix(in srgb, var(--turquoise) 42%, var(--line)); font-size: 1.35rem; line-height: 1; }
 .chord-list { display: grid; gap: 10px; padding: 0; margin: 18px 0; list-style: none; }
-.chord-list li { display: grid; grid-template: "index glyph . actions" auto "summary summary summary summary" auto / 22px 92px minmax(0, 1fr) auto; column-gap: 10px; align-items: start; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+.chord-list li { display: grid; grid-template: "index glyph . actions" auto "summary summary summary summary" auto "sequence sequence sequence sequence" auto / 22px 92px minmax(0, 1fr) auto; column-gap: 10px; align-items: start; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
 .chord-list li.is-playing { background: color-mix(in srgb, var(--seafoam) 28%, transparent); }
 .progression-index { grid-area: index; display: grid; place-items: center; width: 22px; height: 22px; color: var(--surface); background: var(--ink); border-radius: 50%; font-size: .75rem; font-weight: 800; }
 .chord-glyph { grid-area: glyph; width: 92px; height: auto; }
@@ -100,11 +101,15 @@ h2 { margin: 0; font-size: 1.2rem; font-weight: 650; letter-spacing: -.02em; }
 .chord-actions { grid-area: actions; display: flex; gap: 2px; }
 .chord-actions button { min-width: 22px; min-height: 22px; padding: 1px 4px; border-color: var(--line); border-radius: 4px; font-size: .72rem; font-weight: 800; line-height: 1; }
 .chord-actions .chord-action--remove { min-width: 26px; color: var(--coral); border-color: color-mix(in srgb, var(--coral) 42%, var(--line)); font-size: .9rem; }
-.chord-actions .chord-action--move { color: var(--muted); }
-.chord-actions .chord-action--quality { color: var(--muted); }
-.chord-actions .chord-action--quality.is-altered { color: var(--surface); background: var(--coral); border-color: var(--coral); }
+.sequence-actions { grid-area: sequence; display: flex; gap: 3px; padding-top: 5px; }
+.sequence-actions button, .chord-action--quality { min-width: 22px; min-height: 22px; padding: 1px 4px; border: 1px solid var(--line); border-radius: 4px; background: transparent; font-size: .72rem; font-weight: 800; line-height: 1; }
+.sequence-actions .chord-action--duplicate { color: var(--turquoise); border-color: color-mix(in srgb, var(--turquoise) 42%, var(--line)); font-size: .9rem; }
+.chord-action--move, .chord-action--quality { color: var(--muted); }
+.chord-action--quality.is-altered { color: var(--surface); background: var(--coral); border-color: var(--coral); }
 .chord-actions button:disabled { cursor: default; opacity: .3; }
 .chord-actions button:disabled:hover { background: transparent; }
+.sequence-actions button:disabled { cursor: default; opacity: .3; }
+.sequence-actions button:disabled:hover { background: transparent; }
 .clear { width: 100%; margin-top: 4px; }
 .play-sequence { width: 100%; margin-top: 14px; }
 .playback-controls { display: grid; grid-template-columns: minmax(0, 1fr); gap: 9px; margin-top: 18px; }
