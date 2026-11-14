@@ -57,6 +57,12 @@ export const majorProgressions: readonly Progression[] = [
     chord('IV', 'major'),
     chord('iii', 'major'),
   ]),
+  progression('paint-it-black', 'cadences', 'vi–V–I–III · Paint It Black', 'A minor-colored rock cadence that moves through V and I before turning to an altered major III. In C, it is Am–G–C–E; the final E major supplies G♯ before the loop returns to Am.', [
+    chord('vi', 'minor'),
+    chord('V', 'major'),
+    chord('I', 'major'),
+    chord('iii', 'major'),
+  ]),
   diatonicProgression('two-five-one', 'cadences', 'ii–V–I · Jazz cadence', 'The quintessential jazz progression: ii prepares the dominant V, which resolves to tonic I. Its roots move by descending fifths, creating strong harmonic direction.', ['ii', 'V', 'I']),
   diatonicProgression('turnaround', 'cadences', 'I–vi–ii–V · Jazz turnaround', 'A classic turnaround that leaves the tonic and works back toward it through descending-fifth root motion. It is designed to lead naturally into the next repetition.', ['I', 'vi', 'ii', 'V']),
   diatonicProgression('pop-axis', 'loops', 'I–V–vi–IV · Axis / Four-chord pop', 'One of the most recognizable progressions in modern popular music. Its cyclic rotations produce several other familiar pop progressions.', ['I', 'V', 'vi', 'IV']),
