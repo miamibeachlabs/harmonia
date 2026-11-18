@@ -133,6 +133,9 @@ h2 { margin: 0; font-size: 1.2rem; font-weight: 650; letter-spacing: -.02em; }
 .singing-control button { min-height: 28px; padding: 3px 9px; color: var(--turquoise); border-color: color-mix(in srgb, var(--turquoise) 42%, var(--line)); border-radius: 5px; font-size: .75rem; font-weight: 800; }
 .singing-control button.is-listening { color: var(--surface); background: var(--coral); border-color: var(--coral); }
 .singing-control span { color: var(--coral); font-size: .75rem; font-weight: 700; }
+.voice-bias-control { display: flex; align-items: center; gap: 6px; }
+.voice-bias-control > span { color: var(--muted); font-size: .67rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.voice-bias-control select { min-height: 34px; padding: 4px 8px; color: var(--ink); border: 1px solid var(--line); border-radius: 5px; background: var(--surface); font: inherit; font-size: .78rem; font-weight: 800; }
 .staff-map { min-width: 0; }
 .staff-spectrum-raw { stroke: #c5c8c8; stroke-width: 1; stroke-linecap: round; }
 .staff-spectrum-noise-reduced { stroke: #8c9899; stroke-width: 1.1; stroke-linecap: round; }
