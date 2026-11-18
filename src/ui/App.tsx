@@ -1,7 +1,11 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { createChordPlayer, type PlaybackSettings } from '../audio/chordPlayer.ts';
+import { createPitchListener } from '../audio/pitchListener.ts';
 import { chordFromTriad, chordName, chordNotes, chordPitchClasses, chordRootNote, chordRootPitchClass, isMajorOrMinor, romanNumeral, toggledMajorMinor, type Chord } from '../domain/chords.ts';
 import { degreeIn, harmonicFieldFor, keyCollectionLabel, keyCollectionNamed, keyCollections, pitchClassOf, relativeHarmonicMinorFieldFor, thirdLinksIn, triadIn, type Degree, type DiatonicTriad, type HarmonicField, type MinorForm } from '../domain/harmonicField.ts';
+import type { DetectedPitch } from '../domain/pitch.ts';
+import { staffNoteForMidi } from '../domain/staffNotation.ts';
+import { defaultVoiceCenterId, voiceRegisterReferences } from '../domain/voiceRegister.ts';
 import { majorProgressions, progressionFamilies, progressionNamed, rotateBy, type ProgressionFamily } from '../domain/progressions.ts';
 import { canonicalVoicings, voicingRegister } from '../domain/voiceLeading.ts';
 import { sourceCircleLayout } from '../projections/circleOfThirds.ts';
@@ -69,6 +73,7 @@ const arrowSegment = (field: HarmonicField, from: Degree, to: Degree) => {
 
 export const App = () => {
   const [chordPlayer] = useState(createChordPlayer);
+  const [pitchListener] = useState(createPitchListener);
   const [collectionId, setCollectionId] = useState('C');
   const [keyboardReading, setKeyboardReading] = useState<KeyboardReading>('major');
   const [keyboardChordId, setKeyboardChordId] = useState('I:major');
@@ -77,9 +82,16 @@ export const App = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [playingStep, setPlayingStep] = useState<number | null>(null);
   const [playback, setPlayback] = useState(defaultPlayback);
+  const [isListening, setIsListening] = useState(false);
+  const [livePitch, setLivePitch] = useState<DetectedPitch | undefined>();
+  const [spectrum, setSpectrum] = useState<Readonly<{ raw: Uint8Array; noiseReduced: Uint8Array; registerBiased: Uint8Array; binWidth: number }> | undefined>();
+  const [voiceCenterId, setVoiceCenterId] = useState<string | undefined>(defaultVoiceCenterId);
+  const [lastVoiceCenterId, setLastVoiceCenterId] = useState(defaultVoiceCenterId);
+  const [pitchError, setPitchError] = useState<string | undefined>();
   const playbackRef = useRef(playback);
   const collection = keyCollectionNamed(collectionId);
   const progression = progressionId ? progressionNamed(progressionId) : null;
+  const voiceBias = voiceRegisterReferences.find(reference => reference.id === voiceCenterId);
   const referenceField = harmonicFieldFor(collection.major, 'natural');
   const harmonicExploration = keyboardReading === 'harmonic' && !progression;
   const field = harmonicExploration
@@ -134,19 +146,27 @@ export const App = () => {
   const availableKeyboardChords = keyboardChordGroups.flatMap(group => group.chords);
   const keyboardChord = availableKeyboardChords.find(chord => chordIdentity(chord) === keyboardChordId)
     ?? availableKeyboardChords[0];
+  const keyboardChordNotes = chordNotes(field, keyboardChord);
   const notationChord = {
-    noteNames: chordNotes(field, keyboardChord),
+    noteNames: keyboardChordNotes,
     label: `${chordName(field, keyboardChord)} across the grand staff`,
   };
   const keySignatureNotes = keyboardReading === 'major'
     ? collection.major.naturalNotes
     : collection.relativeMinor.naturalNotes;
+  const liveStaffPitch = livePitch ? {
+    note: staffNoteForMidi(livePitch.nearestMidi, keySignatureNotes),
+    cents: livePitch.cents,
+  } : undefined;
   const progressionNotes = sequence.chords.flatMap(chord => chordNotes(field, chord)).map(name => ({
     name,
     pitchClass: pitchClassOf(name),
   })).filter((note, index, notes) => notes.findIndex(candidate => candidate.pitchClass === note.pitchClass) === index);
 
-  useEffect(() => () => chordPlayer.stop(), [chordPlayer]);
+  useEffect(() => () => {
+    chordPlayer.stop();
+    pitchListener.stop();
+  }, [chordPlayer, pitchListener]);
 
   useEffect(() => {
     playbackRef.current = playback;
@@ -194,6 +214,36 @@ export const App = () => {
     setSelectedChords([]);
     setKeyboardReading('major');
     setKeyboardChordId('I:major');
+  };
+
+  const togglePitchListener = async () => {
+    if (isListening) {
+      pitchListener.stop();
+      setLivePitch(undefined);
+      setSpectrum(undefined);
+      setIsListening(false);
+      return;
+    }
+
+    try {
+      setPitchError(undefined);
+      await pitchListener.start(analysis => {
+        setLivePitch(analysis.pitch);
+        setSpectrum({ ...analysis.spectrum, binWidth: analysis.binWidth });
+      });
+      setIsListening(true);
+    } catch {
+      pitchListener.stop();
+      setPitchError('Microphone unavailable');
+      setIsListening(false);
+    }
+  };
+
+  const changeVoiceCenter = (id: string | undefined) => {
+    const nextId = id ?? (voiceCenterId === undefined ? lastVoiceCenterId : undefined);
+    pitchListener.setVoiceCenter(voiceRegisterReferences.find(reference => reference.id === nextId)?.centerMidi);
+    if (nextId !== undefined) setLastVoiceCenterId(nextId);
+    setVoiceCenterId(nextId);
   };
 
   const editProgression = () => {
@@ -416,11 +466,22 @@ export const App = () => {
           </div>
           </div>
           <div class="staff-map">
-            <GrandStaff chord={notationChord} keyNotes={keySignatureNotes} />
+            <div class="singing-control">
+              <p>Sing a note</p>
+              <button class={isListening ? 'is-listening' : ''} aria-pressed={isListening} onClick={() => void togglePitchListener()}>{isListening ? 'Stop listening' : 'Listen to my singing'}</button>
+              {pitchError && <span role="status">{pitchError}</span>}
+            </div>
+            <GrandStaff chord={notationChord} keyNotes={keySignatureNotes} livePitch={liveStaffPitch} spectrum={spectrum} voiceBias={voiceBias} onVoiceBiasChange={changeVoiceCenter} />
           </div>
         </div>
+        <div class="selected-chord-notes" aria-label={`${chordName(field, keyboardChord)} notes`}>
+          {keyboardChordNotes.map((note, index) => <>
+            <span class={`selected-chord-note ${rootHueClass(note)}`}>{note}</span>
+            {index < keyboardChordNotes.length - 1 && <span class="selected-chord-note-separator">·</span>}
+          </>)}
+        </div>
         <PianoKeyboard collection={keyboardCollection} chord={{
-          notes: chordNotes(field, keyboardChord).map(name => ({
+          notes: keyboardChordNotes.map(name => ({
             name,
             pitchClass: pitchClassOf(name),
           })),

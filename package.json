@@ -8,6 +8,7 @@
     "check": "bunx --bun typescript@5.9.3 --noEmit"
   },
   "dependencies": {
+    "pitchy": "4.1.0",
     "preact": "10.29.8"
   }
 }

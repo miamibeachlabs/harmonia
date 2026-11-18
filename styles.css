@@ -21,6 +21,7 @@
   --root-hue-9: #a95866;
   --root-hue-10: #6c7f3d;
   --root-hue-11: #7758aa;
+  --live-pitch: #b8f500;
   color: var(--ink);
   background: var(--sand);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -124,6 +125,33 @@ h2 { margin: 0; font-size: 1.2rem; font-weight: 650; letter-spacing: -.02em; }
 .key-map-controls { min-width: 0; }
 .keyboard-reading-controls { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px; }
 .key-map-controls .keyboard-reading-controls { justify-content: flex-start; }
+.selected-chord-notes { display: flex; justify-content: center; align-items: baseline; gap: 7px; margin: 12px 0; font-size: 1rem; }
+.selected-chord-note { color: var(--root-color); font-weight: 850; }
+.selected-chord-note-separator { color: var(--muted); }
+.singing-control { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin: 0 0 7px; }
+.singing-control p { margin: 0; color: var(--muted); font-size: .67rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+.singing-control button { min-height: 28px; padding: 3px 9px; color: var(--turquoise); border-color: color-mix(in srgb, var(--turquoise) 42%, var(--line)); border-radius: 5px; font-size: .75rem; font-weight: 800; }
+.singing-control button.is-listening { color: var(--surface); background: var(--coral); border-color: var(--coral); }
+.singing-control span { color: var(--coral); font-size: .75rem; font-weight: 700; }
+.staff-map { min-width: 0; }
+.staff-spectrum-raw { stroke: #c5c8c8; stroke-width: 1; stroke-linecap: round; }
+.staff-spectrum-noise-reduced { stroke: #8c9899; stroke-width: 1.1; stroke-linecap: round; }
+.staff-spectrum-register-biased { stroke: #405557; stroke-width: 1.2; stroke-linecap: round; }
+.staff-bias-curve { cursor: pointer; outline: none; }
+.staff-bias-hitbox { fill: transparent; pointer-events: all; }
+.staff-bias-curve > path:not(.staff-bias-area) { fill: none; stroke: #b7c1c1; stroke-width: .75; stroke-dasharray: 1.4 1.4; stroke-linecap: round; }
+.staff-bias-area { fill: #d9dddd; stroke: none; }
+.staff-bias-curve text { fill: var(--muted); font-size: 4.7px; font-weight: 750; dominant-baseline: middle; text-anchor: end; }
+.staff-bias-curve.is-selected > path:not(.staff-bias-area) { stroke: #405557; stroke-width: 1.3; stroke-dasharray: none; }
+.staff-bias-curve.is-selected text { fill: var(--ink); font-weight: 850; }
+.staff-bias-label-highlight { fill: #d9dddd; }
+.staff-bias-range-label { font-size: 3.5px; font-weight: 800; dominant-baseline: middle; }
+.staff-bias-none { cursor: pointer; outline: none; }
+.staff-bias-none rect { fill: var(--surface); stroke: var(--line); stroke-width: .6; }
+.staff-bias-none.is-selected rect { fill: var(--turquoise); stroke: var(--turquoise); }
+.staff-bias-none text { fill: var(--muted); font-size: 3.8px; font-weight: 750; }
+.staff-bias-none .staff-bias-none-check { fill: var(--surface); font-size: 4px; font-weight: 900; text-anchor: middle; }
+.staff-bias-none.is-selected text { fill: var(--ink); font-weight: 850; }
 .keyboard-reading-controls button { min-height: 30px; padding: 4px 8px; border-color: var(--line); border-radius: 5px; color: var(--muted); font-size: .75rem; font-weight: 750; }
 .keyboard-reading-controls button.is-selected { color: var(--surface); background: var(--turquoise); border-color: var(--turquoise); }
 .keyboard-reading-controls button:disabled { cursor: not-allowed; opacity: .35; }
@@ -155,6 +183,7 @@ h2 { margin: 0; font-size: 1.2rem; font-weight: 650; letter-spacing: -.02em; }
 .staff-notehead { fill: var(--root-color); stroke: var(--ink); stroke-width: .35; }
 .staff-accidental { fill: var(--root-color); font-size: 5px; font-weight: 700; text-anchor: middle; dominant-baseline: middle; }
 .staff-note-label { fill: var(--root-color); font-size: 3px; font-weight: 800; dominant-baseline: middle; }
+.staff-live-pitch { fill: var(--live-pitch); stroke: var(--ink); stroke-width: .7; }
 .piano { display: block; width: 100%; height: auto; overflow: visible; }
 .piano-key--white rect { fill: var(--surface); stroke: var(--ink); stroke-width: .08; }
 .piano-key--black rect { fill: var(--ink); }
