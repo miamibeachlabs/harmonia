@@ -6,6 +6,7 @@ import { majorProgressions, progressionFamilies, progressionNamed, rotateBy, typ
 import { canonicalVoicings, voicingRegister } from '../domain/voiceLeading.ts';
 import { sourceCircleLayout } from '../projections/circleOfThirds.ts';
 import { ChordGlyph } from './ChordGlyph.tsx';
+import { GrandStaff } from './GrandStaff.tsx';
 import { MiamiBeachLabsBrand } from './MiamiBeachLabsBrand.tsx';
 import { PianoKeyboard } from './PianoKeyboard.tsx';
 import { rootHueClass } from './rootHue.ts';
@@ -70,7 +71,7 @@ export const App = () => {
   const [chordPlayer] = useState(createChordPlayer);
   const [collectionId, setCollectionId] = useState('C');
   const [keyboardReading, setKeyboardReading] = useState<KeyboardReading>('major');
-  const [keyboardChordId, setKeyboardChordId] = useState<string | null>(null);
+  const [keyboardChordId, setKeyboardChordId] = useState('I:major');
   const [selectedChords, setSelectedChords] = useState<readonly Chord[]>([]);
   const [progressionId, setProgressionId] = useState<string | null>('pop-axis');
   const [isPlaying, setIsPlaying] = useState(false);
@@ -130,8 +131,16 @@ export const App = () => {
     ...(progressionKeyboardChords.length ? [{ label: 'Progression', chords: progressionKeyboardChords }] : []),
     ...(vocabularyChords.length ? [{ label: 'Key vocabulary', chords: vocabularyChords }] : []),
   ];
-  const keyboardChord = keyboardChordGroups.flatMap(group => group.chords)
-    .find(chord => chordIdentity(chord) === keyboardChordId) ?? null;
+  const availableKeyboardChords = keyboardChordGroups.flatMap(group => group.chords);
+  const keyboardChord = availableKeyboardChords.find(chord => chordIdentity(chord) === keyboardChordId)
+    ?? availableKeyboardChords[0];
+  const notationChord = {
+    noteNames: chordNotes(field, keyboardChord),
+    label: `${chordName(field, keyboardChord)} across the grand staff`,
+  };
+  const keySignatureNotes = keyboardReading === 'major'
+    ? collection.major.naturalNotes
+    : collection.relativeMinor.naturalNotes;
   const progressionNotes = sequence.chords.flatMap(chord => chordNotes(field, chord)).map(name => ({
     name,
     pitchClass: pitchClassOf(name),
@@ -149,9 +158,11 @@ export const App = () => {
     setPlayingStep(null);
   }, [chordPlayer, playbackContextKey]);
 
-  const addChord = (triad: DiatonicTriad) => {
-    setProgressionId(null);
-    setSelectedChords(selected => [...selected, chordFromTriad(triad)]);
+  const selectCircleChord = (triad: DiatonicTriad) => {
+    const chord = chordFromTriad(triad);
+    setKeyboardChordId(chordIdentity(chord));
+    if (!sequence.canReorder) return;
+    setSelectedChords(selected => [...selected, chord]);
   };
 
   const removeChord = (index: number) =>
@@ -182,7 +193,7 @@ export const App = () => {
     setProgressionId(id || null);
     setSelectedChords([]);
     setKeyboardReading('major');
-    setKeyboardChordId(null);
+    setKeyboardChordId('I:major');
   };
 
   const editProgression = () => {
@@ -283,8 +294,8 @@ export const App = () => {
                 <div class="degree-slot" style={{ left: `${x}%`, top: `${y}%` }}>
                   <button
                     class={`degree-node degree-node--${node.quality} ${rootHueClass(node.note)} ${selected ? 'is-selected' : ''} ${playing ? 'is-playing' : ''}`}
-                    aria-label={`Add ${node.note} ${node.quality} chord, ${node.degree}`}
-                    onClick={() => addChord(triad)}
+                    aria-label={`Select ${node.note} ${node.quality} chord, ${node.degree}`}
+                    onClick={() => selectCircleChord(triad)}
                   >
                     <span class="note">{nodeName(node.note, node.quality)}</span>
                   </button>
@@ -320,12 +331,11 @@ export const App = () => {
             <>
               <ul class="chord-list">
                 {sequence.chords.map((chord, index) => {
-                  const rootNote = chordRootNote(field, chord);
                   const name = chordName(field, chord);
                   const isDiatonic = chord.quality === triadIn(field, chord.root).quality;
                   return <li class={playingStep === index ? 'is-playing' : ''}>
                     <span class="progression-index">{index + 1}</span>
-                    <ChordGlyph rootHue={rootHueClass(rootNote)} midiNotes={voicedChords[index] ?? []} register={voicingRegister} label={`${name} in its played voicing`} />
+                    <ChordGlyph midiNotes={voicedChords[index] ?? []} noteNames={chordNotes(field, chord)} register={voicingRegister} label={`${name} in its played voicing`} />
                     <div class="chord-summary">
                       <strong class="chord-degree">{romanNumeral(chord)}</strong>
                       <span class="chord-relation">=</span>
@@ -381,31 +391,40 @@ export const App = () => {
             <p class="eyebrow">KEY MAP</p>
             <h2 id="keyboard-title">{keyboardReadingLabel}</h2>
           </div>
+        </div>
+        <div class="key-map-overview">
+          <div class="key-map-controls">
           <div class="keyboard-reading-controls" aria-label="Keyboard reading">
             <button class={keyboardReading === 'major' ? 'is-selected' : ''} aria-pressed={keyboardReading === 'major'} onClick={() => setKeyboardReading('major')}>{collection.major.tonic}</button>
             <button class={keyboardReading === 'natural' ? 'is-selected' : ''} aria-pressed={keyboardReading === 'natural'} onClick={() => setKeyboardReading('natural')}>{collection.relativeMinor.tonic}m</button>
             <button class={keyboardReading === 'harmonic' ? 'is-selected' : ''} aria-pressed={keyboardReading === 'harmonic'} disabled={Boolean(progression)} onClick={() => setKeyboardReading('harmonic')}>{collection.relativeMinor.tonic}m harmonic</button>
           </div>
+          <div class="keyboard-chord-groups" aria-label="Show chord tones on keyboard">
+            {keyboardChordGroups.map(group => <div class="keyboard-chord-group">
+              <p>{group.label}</p>
+              <div class="keyboard-chord-picker">
+                {group.chords.map(chord => {
+                  const id = chordIdentity(chord);
+                  const active = chordIdentity(keyboardChord) === id;
+                  const note = chordRootNote(field, chord);
+                  return <button class={`${rootHueClass(note)} keyboard-chord-picker--${chord.quality} ${group.label === 'Progression' ? 'is-in-progression' : ''} ${active ? 'is-selected' : ''}`} aria-pressed={active} onClick={() => setKeyboardChordId(id)}>
+                    <span>{chord.root}</span>{chordName(field, chord)}{group.label === 'Progression' && <i aria-hidden="true" />}
+                  </button>;
+                })}
+              </div>
+            </div>)}
+          </div>
+          </div>
+          <div class="staff-map">
+            <GrandStaff chord={notationChord} keyNotes={keySignatureNotes} />
+          </div>
         </div>
-        <div class="keyboard-chord-groups" aria-label="Show chord tones on keyboard">
-          {keyboardChordGroups.map(group => <div class="keyboard-chord-group">
-            <p>{group.label}</p>
-            <div class="keyboard-chord-picker">
-              {group.chords.map(chord => {
-                const id = chordIdentity(chord);
-                const active = keyboardChordId === id;
-                const note = chordRootNote(field, chord);
-                return <button class={`${rootHueClass(note)} keyboard-chord-picker--${chord.quality} ${group.label === 'Progression' ? 'is-in-progression' : ''} ${active ? 'is-selected' : ''}`} aria-pressed={active} onClick={() => setKeyboardChordId(active ? null : id)}>
-                  <span>{chord.root}</span>{chordName(field, chord)}{group.label === 'Progression' && <i aria-hidden="true" />}
-                </button>;
-              })}
-            </div>
-          </div>)}
-        </div>
-        <PianoKeyboard collection={keyboardCollection} chord={keyboardChord ? {
-          rootHue: rootHueClass(chordRootNote(field, keyboardChord)),
-          pitchClasses: chordPitchClasses(field, keyboardChord),
-        } : undefined} progressionNotes={progressionNotes} />
+        <PianoKeyboard collection={keyboardCollection} chord={{
+          notes: chordNotes(field, keyboardChord).map(name => ({
+            name,
+            pitchClass: pitchClassOf(name),
+          })),
+        }} progressionNotes={progressionNotes} />
       </section>
     </div>
   );

@@ -1,3 +1,5 @@
+import { rootHueClass } from './rootHue.ts';
+
 type PianoKey = Readonly<{
   pitchClass: number;
   x: number;
@@ -13,8 +15,7 @@ export type KeyboardCollection = Readonly<{
 export type KeyboardNote = KeyboardCollection['notes'][number];
 
 export type KeyboardChord = Readonly<{
-  rootHue: string;
-  pitchClasses: readonly number[];
+  notes: readonly KeyboardNote[];
 }>;
 
 type PianoKeyboardProps = Readonly<{
@@ -30,7 +31,6 @@ const blackKeyX: Readonly<Record<number, number>> = {
   8: 4.66,
   10: 5.66,
 };
-
 const whiteKeyX: Readonly<Record<number, number>> = {
   0: 0,
   2: 1,
@@ -72,10 +72,11 @@ export const PianoKeyboard = ({ collection, chord, progressionNotes = [] }: Pian
     </>;
   };
   const chordTone = (key: PianoKey) => {
-    if (!chord?.pitchClasses.includes(key.pitchClass)) return null;
-    return <rect class={`piano-chord-key ${chord.rootHue}`} x={key.x} y="0" width={key.black ? '.68' : '1'} height={key.black ? '3.15' : '5'} rx={key.black ? '.08' : undefined} />;
+    const note = chord?.notes.find(note => note.pitchClass === key.pitchClass);
+    if (!note) return null;
+    return <rect class={`piano-chord-key ${rootHueClass(note.name)}`} x={key.x} y="0" width={key.black ? '.68' : '1'} height={key.black ? '3.15' : '5'} rx={key.black ? '.08' : undefined} />;
   };
-  const chordToneSelected = (key: PianoKey) => Boolean(chord?.pitchClasses.includes(key.pitchClass));
+  const chordToneSelected = (key: PianoKey) => Boolean(chord?.notes.some(note => note.pitchClass === key.pitchClass));
 
   return (
     <svg class="piano" viewBox="0 0 22 5" role="img" aria-label={collection.label}>
