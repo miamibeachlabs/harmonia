@@ -21,15 +21,15 @@ const lineX1 = 30;
 const lineX2 = 128;
 const clefX = 38;
 const keySignatureX = 50;
-const noteX = 93;
+const noteX = 105;
 const livePitchX = 150;
 const landmarkNoteX = 126;
 const spectrumX = 155;
 const spectrumWidth = 16;
 const biasCurveX = 177;
 const biasCurveWidth = 22;
-const biasLabelRightX = 235;
-const lineYs = [24, 30, 36, 42, 48, 60, 66, 72, 78, 84];
+const biasLabelRightX = 266;
+const lineYs = [10, 8, 6, 4, 2, -2, -4, -6, -8, -10].map(staffYFor);
 
 const keySignatureSteps = {
   treble: {
@@ -126,15 +126,15 @@ export const GrandStaff = ({ chord, keyNotes, livePitch, spectrum, voiceBias, on
             const ledgerY = noteY(ledgerStep);
             return <line class="staff-landmark-ledger" stroke="currentColor" x1={landmarkNoteX - 7} x2={lineX2} y1={ledgerY} y2={ledgerY} />;
           })}
-          <ellipse class="staff-landmark-note" cx={landmarkNoteX} cy={y} rx="2" ry="1.4" transform={`rotate(-18 ${landmarkNoteX} ${y})`} />
+          <ellipse class="staff-landmark-note" cx={landmarkNoteX} cy={y} rx="3.2" ry="3.1" transform={`rotate(-18 ${landmarkNoteX} ${y})`} />
           <text class="staff-landmark-label" x={lineX2 + 4} y={y}>{landmark.label}</text>
         </g>;
       })}
-      <text class="staff-clef staff-clef--treble" fill="currentColor" x={clefX} y="42">𝄞</text>
-      <text class="staff-clef staff-clef--bass" fill="currentColor" x={clefX} y="69">𝄢</text>
+      <text class="staff-clef staff-clef--treble" fill="currentColor" x={clefX} y={staffYFor(4)}>𝄞</text>
+      <text class="staff-clef staff-clef--bass" fill="currentColor" x={clefX} y={staffYFor(-5)}>𝄢</text>
       {keySignature && (['treble', 'bass'] as const).flatMap(clef =>
         Array.from({ length: keySignature.count }, (_, index) => (
-          <text class="staff-key-signature" fill="currentColor" x={keySignatureX + index * 3.5} y={keySignatureY(clef, index)}>{keySignature.accidental}</text>
+          <text class="staff-key-signature" fill="currentColor" x={keySignatureX + index * 6} y={keySignatureY(clef, index)}>{keySignature.accidental}</text>
         )))}
       <line class="staff-middle-c" stroke="currentColor" x1={noteX - 9} x2={noteX + 9} y1={staffYFor(0)} y2={staffYFor(0)} />
       {notes.map(note => {
@@ -145,8 +145,7 @@ export const GrandStaff = ({ chord, keyNotes, livePitch, spectrum, voiceBias, on
             const ledgerY = noteY(ledgerStep);
             return <line class="staff-ledger-line" stroke="currentColor" x1={noteX - 9} x2={noteX + 9} y1={ledgerY} y2={ledgerY} />;
           })}
-          {note.accidental && <text class="staff-accidental" fill="currentColor" x={noteX - 7} y={y}>{note.accidental}</text>}
-          <ellipse class="staff-notehead" fill="currentColor" stroke="currentColor" cx={noteX} cy={y} rx="2.7" ry="1.9" transform={`rotate(-18 ${noteX} ${y})`} />
+          <ellipse class="staff-notehead" fill="currentColor" stroke="currentColor" cx={noteX} cy={y} rx="4.4" ry="4.3" transform={`rotate(-18 ${noteX} ${y})`} />
           <text class="staff-note-label" fill="currentColor" x={noteX + 5} y={y}>{note.name}</text>
         </g>;
       })}
@@ -163,16 +162,16 @@ export const GrandStaff = ({ chord, keyNotes, livePitch, spectrum, voiceBias, on
         onClick={() => onVoiceBiasChange(undefined)}
         onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') onVoiceBiasChange(undefined); }}
       >
-        <rect x={biasCurveX - 7} y="2" width="4" height="4" rx=".6" />
-        {!voiceBias && <text class="staff-bias-none-check" x={biasCurveX - 5} y="5.4">✓</text>}
-        <text x={biasCurveX} y="7">No bias</text>
+        <rect x={biasCurveX - 7} y="4" width="6" height="6" rx=".8" />
+        {!voiceBias && <text class="staff-bias-none-check" x={biasCurveX - 4} y="9.1">✓</text>}
+        <text x={biasCurveX + 2} y="10">No bias</text>
       </g>}
       {voiceRegisterReferences.map(reference => {
         const centerY = noteY(staffNoteForMidi(reference.centerMidi, []).stepFromMiddleC);
         const selected = voiceBias?.id === reference.id;
         const select = () => onVoiceBiasChange?.(reference.id);
         const curve = biasCurveFor(reference, noteY);
-        const labelWidth = reference.label.length * 3 + 3;
+        const labelWidth = reference.label.length * 5.5 + 5;
         const hitBoxX = biasCurveX - 2;
         const hitBoxWidth = biasLabelRightX - hitBoxX + 1;
         const rangeLabels = [reference.highestMidi, reference.centerMidi, reference.lowestMidi].map(midi => ({
@@ -187,11 +186,11 @@ export const GrandStaff = ({ chord, keyNotes, livePitch, spectrum, voiceBias, on
           onClick={select}
           onKeyDown={event => { if ((event.key === 'Enter' || event.key === ' ') && onVoiceBiasChange) select(); }}
         >
-          <rect class="staff-bias-hitbox" x={hitBoxX} y={centerY - 3.5} width={hitBoxWidth} height="7" rx="1" />
+          <rect class="staff-bias-hitbox" x={hitBoxX} y={centerY - 8} width={hitBoxWidth} height="16" rx="2" />
           {selected && curve && <path class="staff-bias-area" d={curve.area} />}
           {curve && <path d={curve.line} />}
-          {selected && rangeLabels.map(({ note, y }) => <text class="staff-bias-range-label" x={biasCurveX + biasCurveWidth + 1} y={y}>{note}</text>)}
-          {selected && <rect class="staff-bias-label-highlight" x={biasLabelRightX - labelWidth} y={centerY - 3} width={labelWidth} height="6" rx="1" />}
+          {selected && rangeLabels.map(({ note, y }) => <text class="staff-bias-range-label" x={biasCurveX + biasCurveWidth * .45} y={y}>{note}</text>)}
+          {selected && <rect class="staff-bias-label-highlight" x={biasLabelRightX - labelWidth} y={centerY - 7} width={labelWidth} height="14" rx="2" />}
           <text x={biasLabelRightX} y={centerY}>{reference.label}</text>
         </g>;
       })}
@@ -200,7 +199,7 @@ export const GrandStaff = ({ chord, keyNotes, livePitch, spectrum, voiceBias, on
           class="staff-live-pitch"
           cx={livePitchX}
           cy={noteY(livePitch.note.stepFromMiddleC) - livePitch.cents / 100 * .8}
-          r="3"
+          r="5"
         />
       )}
     </svg>
