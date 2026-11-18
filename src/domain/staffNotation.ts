@@ -7,6 +7,8 @@ export type StaffNote = Readonly<{
   stepFromMiddleC: number;
 }>;
 
+const chromaticSpellings = ['C', 'C♯', 'D', 'E♭', 'E', 'F', 'F♯', 'G', 'A♭', 'A', 'B♭', 'B'] as const;
+
 /**
  * The chromatic search window is slightly wider than the visible staff.
  * C♯6, for example, belongs on the upper C ledger line, even though its MIDI
@@ -98,6 +100,10 @@ export const staffNotesFor = (midiNotes: readonly number[], spellings: readonly 
       stepFromMiddleC: octave * 7 + letterStep - 28,
     };
   });
+
+/** Places a live chromatic pitch using the key's preferred spellings where available. */
+export const staffNoteForMidi = (midi: number, keyNotes: readonly string[]): StaffNote =>
+  staffNotesFor([midi], [...keyNotes, ...chromaticSpellings])[0];
 
 /** Every occurrence of a selected chord's tones in the fixed grand-staff range. */
 export const staffNotesForChord = (spellings: readonly string[]): readonly StaffNote[] => {
