@@ -5,7 +5,7 @@ import { chordFromTriad, chordName, chordNotes, chordPitchClasses, chordRootNote
 import { degreeIn, harmonicFieldFor, keyCollectionLabel, keyCollectionNamed, keyCollections, pitchClassOf, relativeHarmonicMinorFieldFor, thirdLinksIn, triadIn, type Degree, type DiatonicTriad, type HarmonicField, type MinorForm } from '../domain/harmonicField.ts';
 import type { DetectedPitch } from '../domain/pitch.ts';
 import { staffNoteForMidi } from '../domain/staffNotation.ts';
-import { defaultVoiceCenterId, voiceRegisterReferences } from '../domain/voiceRegister.ts';
+import { defaultVoiceCenterId, noteNameAtMidi, voiceRegisterReferences } from '../domain/voiceRegister.ts';
 import { majorProgressions, progressionFamilies, progressionNamed, rotateBy, type ProgressionFamily } from '../domain/progressions.ts';
 import { canonicalVoicings, voicingRegister } from '../domain/voiceLeading.ts';
 import { sourceCircleLayout } from '../projections/circleOfThirds.ts';
@@ -469,6 +469,13 @@ export const App = () => {
             <div class="singing-control">
               <p>Sing a note</p>
               <button class={isListening ? 'is-listening' : ''} aria-pressed={isListening} onClick={() => void togglePitchListener()}>{isListening ? 'Stop listening' : 'Listen to my singing'}</button>
+              <label class="voice-bias-control">
+                <span>Voice range</span>
+                <select aria-label="Voice range bias" value={voiceCenterId ?? ''} onInput={event => changeVoiceCenter(event.currentTarget.value || undefined)}>
+                  <option value="">No bias</option>
+                  {voiceRegisterReferences.toReversed().map(reference => <option value={reference.id}>{reference.label} · {noteNameAtMidi(reference.lowestMidi)}–{noteNameAtMidi(reference.highestMidi)}</option>)}
+                </select>
+              </label>
               {pitchError && <span role="status">{pitchError}</span>}
             </div>
             <GrandStaff chord={notationChord} keyNotes={keySignatureNotes} livePitch={liveStaffPitch} spectrum={spectrum} voiceBias={voiceBias} onVoiceBiasChange={changeVoiceCenter} />
